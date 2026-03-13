@@ -1,447 +1,1033 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#2e7d32">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-<title>Подбор противогаза ПМК</title>
+<title>Подбор противогаза ПМК/ПМГ</title>
 <style>
-body{font-family:Arial;background:#eef2f3;margin:0;text-align:center}
-h1{margin-top:15px;margin-bottom:5px;font-size:24px;line-height:1.3}
-h1 span{display:block;font-size:20px;font-weight:normal;color:#2e7d32;margin-top:5px}
+  body {
+    font-family: Arial, sans-serif;
+    background: #eef2f3;
+    margin: 0;
+    text-align: center;
+  }
 
-/* Основной контейнер */
-.main-container{display:flex;flex-direction:column;align-items:center;width:100%;max-width:1400px;margin:0 auto;padding:0 10px}
+  /* Переключатель (ползунок) с цветовой индикацией */
+  .toggle-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 15px 10px 5px;
+  }
+  .toggle-label {
+    font-size: 22px;
+    font-weight: bold;
+    transition: color 0.2s;
+  }
+  .toggle-label.pmk {
+    color: #2e7d32;
+  }
+  .toggle-label.pmg {
+    color: #b71c1c;
+  }
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 70px;
+    height: 34px;
+  }
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #2e7d32;
+    transition: 0.2s;
+    border-radius: 34px;
+  }
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.2s;
+    border-radius: 50%;
+  }
+  input:checked + .slider {
+    background-color: #b71c1c;
+  }
+  input:checked + .slider:before {
+    transform: translateX(36px);
+  }
 
-/* Книжная ориентация (по умолчанию) */
-.images-row{display:flex;justify-content:center;gap:40px;margin:20px 0 10px;width:100%;flex-wrap:wrap}
+  h1 {
+    margin: 5px 0 0;
+    font-size: 24px;
+    line-height: 1.3;
+  }
+  h1 span {
+    display: block;
+    font-size: 20px;
+    font-weight: normal;
+    color: #2e7d32;
+    margin-top: 5px;
+    transition: color 0.2s;
+  }
+  h1 span.pmg-mode {
+    color: #b71c1c;
+  }
 
-/* Карточка с картинкой */
-.image-card{display:flex;flex-direction:column;align-items:center;width:180px}
-.image-card img{width:160px;height:auto;border-radius:8px;box-shadow:0 4px 10px rgba(0,0,0,0.2);background:#f0f0f0;min-height:120px;object-fit:contain}
-.image-caption{font-size:12px;color:#555;margin-top:8px;text-align:center;line-height:1.3;max-width:160px}
+  .main-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 10px;
+  }
 
-/* Ряд с кругами - под картинками (книжная) */
-.wheels-row{display:flex;justify-content:center;gap:40px;margin:5px 0 20px;width:100%;flex-wrap:wrap}
+  /* Книжная ориентация */
+  .images-row {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin: 20px 0 10px;
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  .image-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 180px;
+  }
+  .image-card img {
+    width: 160px;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    background: #f0f0f0;
+    min-height: 120px;
+    object-fit: contain;
+  }
+  .image-caption {
+    font-size: 12px;
+    color: #555;
+    margin-top: 8px;
+    text-align: center;
+    line-height: 1.3;
+    max-width: 160px;
+  }
+  .wheels-row {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin: 5px 0 20px;
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  .wheel-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 180px;
+  }
+  .wheel {
+    height: 220px;
+    width: 90px;
+    overflow-y: scroll;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    scroll-snap-type: y mandatory;
+    position: relative;
+    -webkit-overflow-scrolling: touch;
+  }
+  /* Стиль для неактивного колеса в режиме ПМГ */
+  .wheel.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+    background: #f0f0f0;
+  }
+  .value {
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    scroll-snap-align: center;
+    color: #777;
+    transition: all 0.15s;
+  }
+  .value.selected {
+    font-size: 26px;
+    color: #2e7d32;
+    font-weight: bold;
+  }
+  .pmg-mode .value.selected {
+    color: #b71c1c;
+  }
+  .wrapper {
+    position: relative;
+    display: inline-block;
+  }
+  .highlight {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 40px;
+    transform: translateY(-50%);
+    border-top: 2px solid #2e7d32;
+    border-bottom: 2px solid #2e7d32;
+    pointer-events: none;
+    z-index: 10;
+    background: rgba(46,125,50,0.05);
+  }
+  .pmg-mode .highlight {
+    border-top: 2px solid #b71c1c;
+    border-bottom: 2px solid #b71c1c;
+    background: rgba(183,28,28,0.05);
+  }
 
-/* Каждый круг в своей колонке (книжная) */
-.wheel-column{display:flex;flex-direction:column;align-items:center;width:180px}
+  .result {
+    background: white;
+    padding: 20px 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    font-size: 18px;
+    margin: 20px 0;
+    width: 100%;
+    max-width: 400px;
+    box-sizing: border-box;
+  }
+  .result > div {
+    margin: 8px 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .result b {
+    font-weight: bold;
+    color: #000;
+  }
+  /* Стиль для текста "Размер маски" - жирный и увеличенный */
+  .size-label {
+    font-size: 21px;
+    font-weight: 700;
+  }
+  /* Стиль для размера маски - большой жирный шрифт в кружке */
+  .size-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    background-color: #ffeb3b;
+    border-radius: 50%;
+    font-size: 28px;
+    font-weight: 900;
+    color: #000;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    line-height: 1;
+  }
+  .lob-text { color: #ff0000; font-weight: bold; text-transform: uppercase; }
+  .vis-text { color: #0000ff; font-weight: bold; text-transform: uppercase; }
+  .sh-text { color: #ffaa00; font-weight: bold; text-transform: uppercase; text-shadow: 0 0 2px rgba(0,0,0,0.2); }
+  
+  /* Скрытие строк для режима ПМГ */
+  .pmg-mode .result .lob-row,
+  .pmg-mode .result .vis-row,
+  .pmg-mode .result .sh-row {
+    display: none;
+  }
 
-/* Колеса прокрутки */
-.wheel{height:220px;width:90px;overflow-y:scroll;border-radius:12px;background:white;box-shadow:0 4px 10px rgba(0,0,0,0.15);scroll-snap-type:y mandatory;position:relative;-webkit-overflow-scrolling:touch}
-.value{height:40px;display:flex;align-items:center;justify-content:center;font-size:20px;scroll-snap-align:center;color:#777;transition:all .15s}
-.value.selected{font-size:26px;color:#2e7d32;font-weight:bold}
-.wrapper{position:relative;display:inline-block;}
-.highlight{position:absolute;top:50%;left:0;right:0;height:40px;transform:translateY(-50%);border-top:2px solid #2e7d32;border-bottom:2px solid #2e7d32;pointer-events:none;z-index:10;background:rgba(46,125,50,0.05);}
+  @media (max-width:500px) {
+    .images-row { gap: 20px; }
+    .image-card { width: 140px; }
+    .image-card img { width: 120px; }
+    .wheels-row { gap: 20px; }
+    .wheel-column { width: 140px; }
+    .result { max-width: 300px; padding: 15px; font-size: 16px; }
+    h1 { font-size: 22px; }
+    h1 span { font-size: 18px; }
+    .size-label { font-size: 19px; }
+    .size-badge { width: 42px; height: 42px; font-size: 24px; }
+  }
 
-/* Блок с результатами (общий стиль) */
-.result{background:white;padding:20px 25px;border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,0.15);font-size:18px;margin:20px 0;width:100%;max-width:400px;box-sizing:border-box}
-.result>div{margin:8px 0;display:flex;flex-wrap:wrap;justify-content:space-between}
-.result b{font-weight:bold;color:#000}
-
-/* Цветные тексты */
-.lob-text{color:#ff0000;font-weight:bold;text-transform:uppercase}
-.vis-text{color:#0000ff;font-weight:bold;text-transform:uppercase}
-.sh-text{color:#ffaa00;font-weight:bold;text-transform:uppercase;text-shadow:0 0 2px rgba(0,0,0,0.2)}
-
-/* Для маленьких экранов в книжной */
-@media (max-width:500px){
-.images-row{gap:20px}
-.image-card{width:140px}
-.image-card img{width:120px}
-.wheels-row{gap:20px}
-.wheel-column{width:140px}
-.result{max-width:300px;padding:15px;font-size:16px}
-h1{font-size:22px}
-h1 span{font-size:18px}
-}
-
-/* АЛЬБОМНАЯ ОРИЕНТАЦИЯ - всё в одной строке, результаты справа (широкие) */
-@media (orientation: landscape) {
-    .main-container{max-width:100%;padding:0 15px}
+  /* АЛЬБОМНАЯ ОРИЕНТАЦИЯ */
+  @media (orientation: landscape) {
+    .main-container { max-width: 100%; padding: 0 15px; }
+    .images-row, .wheels-row, .result { display: none; }
     
-    /* Скрываем обычные ряды и старый результат */
-    .images-row{display:none}
-    .wheels-row{display:none}
-    .result{display:none}
+    /* Фиксированная верхняя панель */
+    .landscape-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      align-items: center;
+      padding: 10px 20px;
+      background: rgba(238, 242, 243, 0.95);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      z-index: 1000;
+      backdrop-filter: blur(5px);
+    }
     
-    /* Горизонтальный контейнер для всего */
-    .landscape-row{display:flex;flex-direction:row;justify-content:center;align-items:center;gap:14px;width:100%;margin:14px 0;flex-wrap:wrap}
+    .landscape-header .toggle-container {
+      margin: 0;
+      flex-shrink: 0;
+    }
     
-    /* Каждый элемент (картинка или круг) - увеличен на 20% от исходного */
-    .landscape-item{display:flex;flex-direction:column;align-items:center;min-width:95px}
+    .landscape-header h1 {
+      margin: 0 0 0 15%;
+      text-align: left;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .landscape-header h1 span {
+      font-size: 16px;
+      margin-top: 2px;
+      display: block;
+    }
     
-    /* Картинки в альбомной - +20% (исходно 75px -> 90px, было 85 -> теперь 95) */
-    .landscape-item img{width:95px;height:auto;border-radius:8px;box-shadow:0 3px 8px rgba(0,0,0,0.2)}
+    .landscape-row {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+      margin: 80px 0 14px;
+      flex-wrap: wrap;
+    }
     
-    /* Подписи под картинками - увеличены */
-    .landscape-caption{font-size:9px;color:#555;text-align:center;max-width:95px;margin-top:5px;line-height:1.4}
+    .landscape-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 95px;
+    }
+    .landscape-item img {
+      width: 95px;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+    }
+    .landscape-caption {
+      font-size: 9px;
+      color: #555;
+      text-align: center;
+      max-width: 95px;
+      margin-top: 5px;
+      line-height: 1.4;
+    }
+    .landscape-item .wheel {
+      height: 160px;
+      width: 68px;
+    }
+    .landscape-item .wrapper {
+      display: inline-block;
+      position: relative;
+    }
+    .landscape-item .highlight {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 48px;
+      transform: translateY(-50%);
+      border-top: 2px solid #2e7d32;
+      border-bottom: 2px solid #2e7d32;
+      background: rgba(46,125,50,0.05);
+    }
+    .pmg-mode .landscape-item .highlight {
+      border-top: 2px solid #b71c1c;
+      border-bottom: 2px solid #b71c1c;
+      background: rgba(183,28,28,0.05);
+    }
+    .landscape-item .value {
+      height: 48px;
+      font-size: 16px;
+      line-height: 48px;
+    }
+    .landscape-item .value.selected {
+      font-size: 21px;
+      font-weight: bold;
+      color: #2e7d32;
+    }
+    .pmg-mode .landscape-item .value.selected {
+      color: #b71c1c;
+    }
+    .landscape-result {
+      background: white;
+      padding: 16px 22px;
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+      font-size: 17px;
+      min-width: 320px;
+      margin-left: 14px;
+      flex-shrink: 0;
+    }
+    .landscape-result > div {
+      margin: 8px 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .landscape-result b { font-weight: bold; color: #000; }
     
-    /* Колеса в альбомной - +20% (исходно 130x55 -> 156x66, было 145x62 -> теперь 160x68) */
-    .landscape-item .wheel{height:160px;width:68px}
-    .landscape-item .wrapper{display:inline-block;position:relative;}
-    .landscape-item .highlight{position:absolute;top:50%;left:0;right:0;height:48px;transform:translateY(-50%);border-top:2px solid #2e7d32;border-bottom:2px solid #2e7d32;background:rgba(46,125,50,0.05);}
-    .landscape-item .value{height:48px;font-size:16px;line-height:48px;}
-    .landscape-item .value.selected{font-size:21px;font-weight:bold;}
+    /* Стиль для текста "Размер маски" в альбомном режиме */
+    .landscape-result .size-label {
+      font-size: 20px;
+      font-weight: 700;
+    }
     
-    /* Результаты в альбомной - +20% */
-    .landscape-result{background:white;padding:16px 22px;border-radius:10px;box-shadow:0 3px 10px rgba(0,0,0,0.15);font-size:17px;min-width:320px;margin-left:14px;flex-shrink:0}
-    .landscape-result>div{margin:8px 0;display:flex;flex-wrap:wrap;justify-content:space-between}
-    .landscape-result b{font-weight:bold;color:#000}
-}
+    /* Стиль для размера маски в альбомном режиме */
+    .landscape-result .size-badge {
+      width: 44px;
+      height: 44px;
+      font-size: 26px;
+    }
+    
+    /* Скрытие строк в альбомном режиме */
+    .pmg-mode .landscape-result .lob-row,
+    .pmg-mode .landscape-result .vis-row,
+    .pmg-mode .landscape-result .sh-row {
+      display: none;
+    }
+  }
 
-/* Для широких экранов (ещё шире результаты) - тоже с увеличением на 20% */
-@media (orientation: landscape) and (min-width: 900px) {
-    .landscape-item{min-width:110px}
-    .landscape-item img{width:110px}
-    .landscape-caption{font-size:10px;max-width:110px}
-    .landscape-item .wheel{height:180px;width:78px}
-    .landscape-item .highlight{height:48px;}
-    .landscape-result{font-size:20px;min-width:390px;padding:19px 25px}
-}
-
-/* Для очень широких экранов */
-@media (orientation: landscape) and (min-width: 1200px) {
-    .landscape-result{min-width:460px;font-size:22px}
-}
+  @media (orientation: landscape) and (min-width: 900px) {
+    .landscape-header h1 { 
+      font-size: 24px; 
+      margin-left: 20%;
+    }
+    .landscape-header h1 span { font-size: 18px; }
+    .landscape-item { min-width: 110px; }
+    .landscape-item img { width: 110px; }
+    .landscape-caption { font-size: 10px; max-width: 110px; }
+    .landscape-item .wheel { height: 180px; width: 78px; }
+    .landscape-result { font-size: 20px; min-width: 390px; padding: 19px 25px; }
+    .landscape-result .size-label { font-size: 23px; }
+    .landscape-result .size-badge { width: 52px; height: 52px; font-size: 32px; }
+  }
+  @media (orientation: landscape) and (min-width: 1200px) {
+    .landscape-header h1 { margin-left: 25%; }
+    .landscape-result { min-width: 460px; font-size: 22px; }
+    .landscape-result .size-label { font-size: 25px; }
+  }
 </style>
 </head>
 <body>
-<h1>ПОДБОР<br><span>ПРОТИВОГАЗА ПМК</span></h1>
 
-<div class="main-container">
-
-<!-- Книжная версия (по умолчанию) -->
-<div class="images-row">
-<!-- Левая карточка -->
-<div class="image-card">
-<img src="Размер 1.jpg" alt="Измерение 1" onerror="this.src='https://via.placeholder.com/160x120/2e7d32/ffffff?text=ПМК+1'">
-<div class="image-caption">Измерение производить по кругу через надбровные дуги и верхушку ушных раковин.</div>
-</div>
-
-<!-- Правая карточка -->
-<div class="image-card">
-<img src="Размер 2.jpg" alt="Измерение 2" onerror="this.src='https://via.placeholder.com/160x120/0000ff/ffffff?text=ПМК+2'">
-<div class="image-caption">Измерение производить от виска, через макушку, щеки, подбородок и заканчивать у второго виска.</div>
-</div>
+<!-- Книжная версия переключателя и заголовка -->
+<div class="toggle-container" id="portraitToggle">
+  <span class="toggle-label pmk" id="pmkLabel">ПМК</span>
+  <label class="switch">
+    <input type="checkbox" id="modelToggle">
+    <span class="slider"></span>
+  </label>
+  <span class="toggle-label pmg" id="pmgLabel">ПМГ</span>
 </div>
 
-<!-- Книжная версия - круги под картинками -->
-<div class="wheels-row">
-<div class="wheel-column">
-<div class="wrapper">
-<div id="w1" class="wheel"></div>
-<div class="highlight"></div>
-</div>
-</div>
-<div class="wheel-column">
-<div class="wrapper">
-<div id="w2" class="wheel"></div>
-<div class="highlight"></div>
-</div>
-</div>
+<h1 id="mainTitle">ПОДБОР<br><span id="subtitleSpan">ПРОТИВОГАЗА ПМК</span></h1>
+
+<!-- Альбомная версия верхней панели (изначально скрыта) -->
+<div class="landscape-header" id="landscapeHeader" style="display: none;">
+  <div class="toggle-container" id="landscapeToggle">
+    <span class="toggle-label pmk" id="pmkLabelLandscape">ПМК</span>
+    <label class="switch">
+      <input type="checkbox" id="modelToggleLandscape">
+      <span class="slider"></span>
+    </label>
+    <span class="toggle-label pmg" id="pmgLabelLandscape">ПМГ</span>
+  </div>
+  <h1 id="landscapeTitle">ПОДБОР<br><span id="subtitleSpanLandscape">ПРОТИВОГАЗА ПМК</span></h1>
 </div>
 
-<!-- Контейнер для альбомной версии (одна строка: картинка1, круг1, картинка2, круг2, результаты) -->
-<div id="landscape-container" style="display:none;"></div>
+<div class="main-container" id="mainContainer">
+  <!-- Книжная версия -->
+  <div class="images-row">
+    <div class="image-card">
+      <img src="Размер 1.jpg" alt="Измерение 1" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'160\' height=\'120\' viewBox=\'0 0 160 120\'%3E%3Crect width=\'160\' height=\'120\' fill=\'%232e7d32\'/%3E%3Ctext x=\'80\' y=\'60\' font-family=\'Arial\' font-size=\'14\' fill=\'white\' text-anchor=\'middle\' dominant-baseline=\'middle\'%3EРазмер 1.jpg%3C/text%3E%3C/svg%3E'">
+      <div class="image-caption">Измерение производить по кругу через надбровные дуги и верхушку ушных раковин.</div>
+    </div>
+    <div class="image-card">
+      <img src="Размер 2.jpg" alt="Измерение 2" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'160\' height=\'120\' viewBox=\'0 0 160 120\'%3E%3Crect width=\'160\' height=\'120\' fill=\'%230000ff\'/%3E%3Ctext x=\'80\' y=\'60\' font-family=\'Arial\' font-size=\'14\' fill=\'white\' text-anchor=\'middle\' dominant-baseline=\'middle\'%3EРазмер 2.jpg%3C/text%3E%3C/svg%3E'">
+      <div class="image-caption">Измерение производить от виска, через макушку, щеки, подбородок и заканчивать у второго виска.</div>
+    </div>
+  </div>
 
-<!-- Блок результатов для книжной версии -->
-<div class="result" id="portrait-result">
-<div>Сумма 2-х измерений: <b id="sum">0</b> см</div>
-<div>Размер маски: <b id="size">-</b></div>
-<div>Номер упора <span class="lob-text">ЛОБНОЙ</span> лямки: <b id="lob">-</b></div>
-<div>Номер упора <span class="vis-text">ВИСОЧНОЙ</span> лямки: <b id="vis">-</b></div>
-<div>Номер упора <span class="sh-text">ЩЕЧНОЙ</span> лямки: <b id="sh">-</b></div>
+  <div class="wheels-row">
+    <div class="wheel-column">
+      <div class="wrapper">
+        <div id="w1" class="wheel"></div>
+        <div class="highlight"></div>
+      </div>
+    </div>
+    <div class="wheel-column">
+      <div class="wrapper">
+        <div id="w2" class="wheel"></div>
+        <div class="highlight"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Результат для книжной -->
+  <div class="result" id="portrait-result">
+    <div id="sum-label">Сумма 2-х измерений: <b id="sum">0</b> см</div>
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+      <span class="size-label">Размер маски:</span>
+      <span id="size" class="size-badge">-</span>
+    </div>
+    <div class="lob-row">Номер упора <span class="lob-text">ЛОБНОЙ</span> лямки: <b id="lob">-</b></div>
+    <div class="vis-row">Номер упора <span class="vis-text">ВИСОЧНОЙ</span> лямки: <b id="vis">-</b></div>
+    <div class="sh-row">Номер упора <span class="sh-text">ЩЕЧНОЙ</span> лямки: <b id="sh">-</b></div>
+  </div>
 </div>
 
-</div>
+<!-- Контейнер для альбомной версии контента -->
+<div id="landscape-container"></div>
 
 <script>
-function fillWheel(el, start, end){
-for(let i=start; i<=end; i+=0.5){
-let d=document.createElement('div')
-d.className='value'
-d.innerText=i.toFixed(1)
-d.dataset.val=i
-el.appendChild(d)
-}
-}
+(function() {
+  // Элементы книжной версии
+  const portraitToggle = document.getElementById('portraitToggle');
+  const mainTitle = document.getElementById('mainTitle');
+  const subtitleSpan = document.getElementById('subtitleSpan');
+  const mainContainer = document.getElementById('mainContainer');
+  const sumLabel = document.getElementById('sum-label');
+  
+  // Элементы альбомной версии
+  const landscapeHeader = document.getElementById('landscapeHeader');
+  const landscapeToggle = document.getElementById('landscapeToggle');
+  const landscapeTitle = document.getElementById('landscapeTitle');
+  const subtitleSpanLandscape = document.getElementById('subtitleSpanLandscape');
+  const landscapeContainer = document.getElementById('landscape-container');
+  
+  // Чекбоксы
+  const portraitCheckbox = document.getElementById('modelToggle');
+  const landscapeCheckbox = document.getElementById('modelToggleLandscape');
+  
+  // Метки
+  const pmkLabel = document.getElementById('pmkLabel');
+  const pmgLabel = document.getElementById('pmgLabel');
+  const pmkLabelLandscape = document.getElementById('pmkLabelLandscape');
+  const pmgLabelLandscape = document.getElementById('pmgLabelLandscape');
 
-// Заполняем колёсики значениями от 30 до 90
-fillWheel(w1, 30, 90)
-fillWheel(w2, 30, 90)
+  let currentMode = 'pmk';
 
-// Установка значений по умолчанию
-function setDefaultValues() {
-    const items1 = w1.children;
-    for (let item of items1) {
-        if (item.dataset.val == 55.0) {
-            item.scrollIntoView({ block: 'center', behavior:'smooth' });
-            break;
-        }
+  function updateModeUI() {
+    const isPmg = currentMode === 'pmg';
+    const modeText = isPmg ? 'ПРОТИВОГАЗА ПМГ' : 'ПРОТИВОГАЗА ПМК';
+    const modeClass = isPmg ? 'pmg-mode' : '';
+    
+    // Обновляем книжные элементы
+    subtitleSpan.innerText = modeText;
+    subtitleSpan.className = modeClass;
+    
+    // Меняем текст "Сумма 2-х измерений" на "Полученный размер" для ПМГ
+    if (sumLabel) {
+      const labelText = sumLabel.childNodes[0];
+      if (labelText) {
+        labelText.textContent = isPmg ? 'Полученный размер: ' : 'Сумма 2-х измерений: ';
+      }
     }
     
-    const items2 = w2.children;
-    for (let item of items2) {
-        if (item.dataset.val == 65.0) {
-            item.scrollIntoView({ block: 'center', behavior:'smooth' });
-            break;
-        }
+    // Обновляем альбомные элементы
+    if (subtitleSpanLandscape) {
+      subtitleSpanLandscape.innerText = modeText;
+      subtitleSpanLandscape.className = modeClass;
     }
-}
+    
+    // Обновляем текст в альбомном результате
+    const landscapeSumLabel = document.getElementById('landscape-sum-label');
+    if (landscapeSumLabel) {
+      landscapeSumLabel.textContent = isPmg ? 'Полученный размер:' : 'Сумма 2-х измерений:';
+    }
+    
+    document.body.classList.toggle('pmg-mode', isPmg);
+    
+    // Синхронизируем чекбоксы
+    if (portraitCheckbox) portraitCheckbox.checked = isPmg;
+    if (landscapeCheckbox) landscapeCheckbox.checked = isPmg;
+    
+    // Обновляем цвета меток
+    const pmkColor = isPmg ? '#777' : '#2e7d32';
+    const pmgColor = isPmg ? '#b71c1c' : '#777';
+    
+    if (pmkLabel) pmkLabel.style.color = pmkColor;
+    if (pmgLabel) pmgLabel.style.color = pmgColor;
+    if (pmkLabelLandscape) pmkLabelLandscape.style.color = pmkColor;
+    if (pmgLabelLandscape) pmgLabelLandscape.style.color = pmgColor;
+    
+    // Блокировка/разблокировка первого колеса для всех колес
+    const allWheels = document.querySelectorAll('.wheel');
+    allWheels.forEach((wheel, index) => {
+      // Блокируем первое колесо в каждой паре
+      if (index % 2 === 0) {
+        if (isPmg) {
+          wheel.classList.add('disabled');
+        } else {
+          wheel.classList.remove('disabled');
+        }
+      }
+    });
+    
+    highlightSelected();
+    calc();
+  }
 
-function getCenterValue(wheel){
+  // Обработчики для чекбоксов
+  if (portraitCheckbox) {
+    portraitCheckbox.addEventListener('change', function(e) {
+      currentMode = e.target.checked ? 'pmg' : 'pmk';
+      
+      // Устанавливаем значение по умолчанию для второго колеса в зависимости от режима
+      setTimeout(() => {
+        const wheel2 = document.getElementById('w2');
+        const targetValue = currentMode === 'pmg' ? 97.0 : 65.0;
+        
+        for (let item of wheel2.children) {
+          if (item.dataset.val == targetValue) {
+            item.scrollIntoView({ block: 'center' });
+            break;
+          }
+        }
+        
+        // Также обновляем ландшафтное колесо, если оно существует
+        const wheel2Landscape = document.getElementById('w2-landscape');
+        if (wheel2Landscape) {
+          for (let item of wheel2Landscape.children) {
+            if (item.dataset.val == targetValue) {
+              item.scrollIntoView({ block: 'center' });
+              break;
+            }
+          }
+        }
+        
+        updateModeUI();
+      }, 50);
+    });
+  }
+  
+  if (landscapeCheckbox) {
+    landscapeCheckbox.addEventListener('change', function(e) {
+      currentMode = e.target.checked ? 'pmg' : 'pmk';
+      
+      // Устанавливаем значение по умолчанию для второго колеса в зависимости от режима
+      setTimeout(() => {
+        const wheel2 = document.getElementById('w2');
+        const targetValue = currentMode === 'pmg' ? 97.0 : 65.0;
+        
+        for (let item of wheel2.children) {
+          if (item.dataset.val == targetValue) {
+            item.scrollIntoView({ block: 'center' });
+            break;
+          }
+        }
+        
+        // Также обновляем ландшафтное колесо
+        const wheel2Landscape = document.getElementById('w2-landscape');
+        if (wheel2Landscape) {
+          for (let item of wheel2Landscape.children) {
+            if (item.dataset.val == targetValue) {
+              item.scrollIntoView({ block: 'center' });
+              break;
+            }
+          }
+        }
+        
+        updateModeUI();
+      }, 50);
+    });
+  }
+
+  function highlightSelected() {
+    const wheels = document.querySelectorAll('.wheel');
+    wheels.forEach(w => {
+      Array.from(w.children).forEach(child => {
+        if (child.classList.contains('selected')) {
+          child.classList.remove('selected');
+          child.classList.add('selected');
+        }
+      });
+    });
+  }
+
+  // --- Колёса, расчеты, ландшафт ---
+  function fillWheel(el, start, end){
+    for(let i=start; i<=end; i+=0.5){
+      let d=document.createElement('div');
+      d.className='value';
+      d.innerText=i.toFixed(1);
+      d.dataset.val=i;
+      el.appendChild(d);
+    }
+  }
+  
+  // Первое колесо (ПМК) от 30 до 90
+  fillWheel(document.getElementById('w1'), 30, 90);
+  // Второе колесо от 50 до 120 для ПМГ
+  fillWheel(document.getElementById('w2'), 50, 120);
+
+  function setDefaultValues() {
+    // Первое колесо всегда 55.0
+    const items1 = document.getElementById('w1').children;
+    for (let item of items1) { 
+      if (item.dataset.val == 55.0) { 
+        item.scrollIntoView({ block: 'center' }); 
+        break; 
+      } 
+    }
+    
+    // Второе колесо - в зависимости от режима
+    const items2 = document.getElementById('w2').children;
+    const targetValue = currentMode === 'pmg' ? 97.0 : 65.0;
+    
+    for (let item of items2) { 
+      if (item.dataset.val == targetValue) { 
+        item.scrollIntoView({ block: 'center' }); 
+        break; 
+      } 
+    }
+  }
+
+  function getCenterValue(wheel){
     const rect = wheel.getBoundingClientRect();
     const wheelCenter = rect.top + rect.height / 2;
     let items = [...wheel.children];
     let selectedItem = null;
     let minDistance = Infinity;
-
-    // Сначала убираем выделение у всех
+    items.forEach(it => it.classList.remove('selected'));
     items.forEach(it => {
-        it.classList.remove('selected');
+      const itemRect = it.getBoundingClientRect();
+      const itemCenter = itemRect.top + itemRect.height / 2;
+      const distance = Math.abs(itemCenter - wheelCenter);
+      if (distance < minDistance) { minDistance = distance; selectedItem = it; }
     });
-
-    // Находим элемент, центр которого ближе всего к центру колеса
-    items.forEach(it => {
-        const itemRect = it.getBoundingClientRect();
-        const itemCenter = itemRect.top + itemRect.height / 2;
-        const distance = Math.abs(itemCenter - wheelCenter);
-        
-        if (distance < minDistance) {
-            minDistance = distance;
-            selectedItem = it;
-        }
-    });
-
-    if(selectedItem) {
-        selectedItem.classList.add('selected');
-        return parseFloat(selectedItem.dataset.val);
+    if(selectedItem) { 
+      selectedItem.classList.add('selected'); 
+      return parseFloat(selectedItem.dataset.val); 
     }
-    
-    return wheel.id === 'w1' || wheel.id === 'w1-landscape' ? 55.0 : 65.0;
-}
+    // Значения по умолчанию
+    if (wheel.id === 'w1' || wheel.id === 'w1-landscape') return 55.0;
+    if (wheel.id === 'w2' || wheel.id === 'w2-landscape') {
+      return currentMode === 'pmg' ? 97.0 : 65.0;
+    }
+    return 0;
+  }
 
-function setLandscapeDefaultValues() {
-    setTimeout(() => {
+  function snapToCenter(wheel){
+    const rect = wheel.getBoundingClientRect();
+    const wheelCenter = rect.top + rect.height / 2;
+    const items = [...wheel.children];
+    let closest = null, minDistance = Infinity;
+    items.forEach(item => {
+      const r = item.getBoundingClientRect();
+      const center = r.top + r.height / 2;
+      const distance = Math.abs(center - wheelCenter);
+      if(distance < minDistance){ minDistance = distance; closest = item; }
+    });
+    if(closest) closest.scrollIntoView({ block:"center", behavior:"smooth" });
+  }
+
+  function calc() {
+    const isPmg = currentMode === 'pmg';
+    let size = '-', l = '-', v = '-', cheek = '-';
+    let sizeDisplay = '-';
+    let sumDisplay = '0';
+    
+    if (isPmg) {
+      // Режим ПМГ: используем только второе колесо
+      let b;
+      if (window.matchMedia("(orientation: landscape)").matches) {
+        const wheel2 = document.getElementById('w2-landscape');
+        if (wheel2) {
+          b = getCenterValue(wheel2);
+        } else {
+          b = getCenterValue(document.getElementById('w2'));
+        }
+      } else {
+        b = getCenterValue(document.getElementById('w2'));
+      }
+      
+      sumDisplay = b.toFixed(1);
+      
+      // Определяем размер маски по новой таблице для ПМГ
+      if (b < 93) sizeDisplay = '0';
+      else if (b >= 93 && b < 95) sizeDisplay = '1';
+      else if (b >= 95 && b < 99) sizeDisplay = '2';
+      else if (b >= 99 && b < 103) sizeDisplay = '3';
+      else if (b >= 103) sizeDisplay = '4';
+      else sizeDisplay = '-';
+      
+      // В режиме ПМГ остальные поля не показываются (скрыты через CSS)
+      l = '-'; v = '-'; cheek = '-';
+      
+    } else {
+      // Режим ПМК: используем оба колеса
+      let a, b;
+      if (window.matchMedia("(orientation: landscape)").matches) {
         const wheel1 = document.getElementById('w1-landscape');
         const wheel2 = document.getElementById('w2-landscape');
-        
-        if (wheel1) {
-            const items1 = wheel1.children;
-            for (let item of items1) {
-                if (item.dataset.val == 55.0) {
-                    item.scrollIntoView({ block: 'center', behavior:'smooth' });
-                    break;
-                }
-            }
+        if (wheel1 && wheel2) {
+          a = getCenterValue(wheel1);
+          b = getCenterValue(wheel2);
+        } else {
+          a = getCenterValue(document.getElementById('w1'));
+          b = getCenterValue(document.getElementById('w2'));
         }
-        
-        if (wheel2) {
-            const items2 = wheel2.children;
-            for (let item of items2) {
-                if (item.dataset.val == 65.0) {
-                    item.scrollIntoView({ block: 'center', behavior:'smooth' });
-                    break;
-                }
-            }
-        }
-        
-        setTimeout(calc, 100);
-    }, 100);
-}
-
-function calc(){
-let a, b, size='-', l='-', v='-', cheek='-';
-
-if (window.matchMedia("(orientation: landscape)").matches) {
-    // Альбомная - используем ландшафтные колеса
-    const wheel1 = document.getElementById('w1-landscape');
-    const wheel2 = document.getElementById('w2-landscape');
-    if (wheel1 && wheel2) {
-        a = getCenterValue(wheel1);
-        b = getCenterValue(wheel2);
-    } else {
+      } else {
         a = getCenterValue(document.getElementById('w1'));
         b = getCenterValue(document.getElementById('w2'));
+      }
+
+      let sum = a + b;
+      sumDisplay = sum.toFixed(1);
+      
+      // Таблица размеров для ПМК
+      if(sum<=118.5){ sizeDisplay=1; l=4; v=8; cheek=6; }
+      else if(sum<=121){ sizeDisplay=1; l=3; v=7; cheek=6; }
+      else if(sum<=123.5){ sizeDisplay=2; l=3; v=7; cheek=6; }
+      else if(sum<=126){ sizeDisplay=2; l=3; v=6; cheek=5; }
+      else if(sum<=128.5){ sizeDisplay=3; l=3; v=6; cheek=5; }
+      else if(sum<=131){ sizeDisplay=3; l=3; v=5; cheek=4; }
+      else { sizeDisplay=3; l=3; v=4; cheek=3; }
     }
-} else {
-    // Книжная - используем оригинальные
-    a = getCenterValue(document.getElementById('w1'));
-    b = getCenterValue(document.getElementById('w2'));
-}
 
-let sum = (a + b);
-let s = sum.toFixed(1);
+    // Обновляем книжный результат
+    document.getElementById('sum').innerText = sumDisplay;
+    const sizeElement = document.getElementById('size');
+    sizeElement.innerText = sizeDisplay;
+    // Добавляем класс для стилизации, даже если значение изменилось
+    sizeElement.classList.add('size-badge');
+    
+    document.getElementById('lob').innerText = l;
+    document.getElementById('vis').innerText = v;
+    document.getElementById('sh').innerText = cheek;
 
-// Определяем размер и номера упоров
-if(sum<=118.5){size=1;l=4;v=8;cheek=6}
-else if(sum<=121){size=1;l=3;v=7;cheek=6}
-else if(sum<=123.5){size=2;l=3;v=7;cheek=6}
-else if(sum<=126){size=2;l=3;v=6;cheek=5}
-else if(sum<=128.5){size=3;l=3;v=6;cheek=5}
-else if(sum<=131){size=3;l=3;v=5;cheek=4}
-else{size=3;l=3;v=4;cheek=3}
+    const landscapeSum = document.getElementById('landscape-sum');
+    const landscapeSize = document.getElementById('landscape-size');
+    const landscapeLob = document.getElementById('landscape-lob');
+    const landscapeVis = document.getElementById('landscape-vis');
+    const landscapeSh = document.getElementById('landscape-sh');
+    
+    if (landscapeSum) landscapeSum.innerText = sumDisplay;
+    if (landscapeSize) {
+      landscapeSize.innerText = sizeDisplay;
+      landscapeSize.classList.add('size-badge');
+    }
+    if (landscapeLob) landscapeLob.innerText = l;
+    if (landscapeVis) landscapeVis.innerText = v;
+    if (landscapeSh) landscapeSh.innerText = cheek;
+  }
 
-// Обновляем книжный результат
-document.getElementById('sum').innerText = s;
-document.getElementById('size').innerText = size;
-document.getElementById('lob').innerText = l;
-document.getElementById('vis').innerText = v;
-document.getElementById('sh').innerText = cheek;
-
-// Обновляем альбомный результат, если он существует
-const landscapeSum = document.getElementById('landscape-sum');
-const landscapeSize = document.getElementById('landscape-size');
-const landscapeLob = document.getElementById('landscape-lob');
-const landscapeVis = document.getElementById('landscape-vis');
-const landscapeSh = document.getElementById('landscape-sh');
-
-if (landscapeSum) landscapeSum.innerText = s;
-if (landscapeSize) landscapeSize.innerText = size;
-if (landscapeLob) landscapeLob.innerText = l;
-if (landscapeVis) landscapeVis.innerText = v;
-if (landscapeSh) landscapeSh.innerText = cheek;
-}
-
-// Добавляем обработчики на оригинальные колеса
-[w1, w2].forEach(w => {
+  let scrollTimer;
+  [document.getElementById('w1'), document.getElementById('w2')].forEach(w => {
     w.addEventListener('scroll', () => {
-        setTimeout(calc, 50);
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(() => { 
+        snapToCenter(w); 
+        calc(); 
+      }, 120);
     });
-});
+  });
 
-// Функция для создания альбомной версии (одна строка: картинка1, круг1, картинка2, круг2, результаты)
-function createLandscapeView() {
-    const landscapeContainer = document.getElementById('landscape-container');
+  function createLandscapeView() {
     if (!landscapeContainer) return;
     
-    // Получаем оригинальные картинки и подписи
     const originalImages = document.querySelectorAll('.image-card img');
     const originalCaptions = document.querySelectorAll('.image-caption');
     if (originalImages.length < 2) return;
     
-    // Очищаем контейнер
     landscapeContainer.innerHTML = '';
     landscapeContainer.className = 'landscape-row';
-    
-    // Функция создания элемента с картинкой
+
     function createImageItem(imgSrc, captionText, index) {
-        const item = document.createElement('div');
-        item.className = 'landscape-item';
-        
-        const img = document.createElement('img');
-        img.src = imgSrc;
-        img.alt = `Измерение ${index+1}`;
-        
-        const caption = document.createElement('div');
-        caption.className = 'landscape-caption';
-        caption.textContent = captionText;
-        
-        item.appendChild(img);
-        item.appendChild(caption);
-        
-        return item;
+      const item = document.createElement('div'); 
+      item.className = 'landscape-item';
+      const img = document.createElement('img'); 
+      img.src = imgSrc; 
+      img.alt = `Измерение ${index+1}`;
+      // Добавляем обработчик ошибок и для ландшафтных изображений
+      img.onerror = function() { 
+        this.src = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'95\' height=\'71\' viewBox=\'0 0 95 71\'%3E%3Crect width=\'95\' height=\'71\' fill=\'%23' + (index === 0 ? '2e7d32' : '0000ff') + '\'/%3E%3Ctext x=\'47.5\' y=\'35.5\' font-family=\'Arial\' font-size=\'10\' fill=\'white\' text-anchor=\'middle\' dominant-baseline=\'middle\'%3E' + (index === 0 ? 'Размер 1' : 'Размер 2') + '%3C/text%3E%3C/svg%3E'; 
+      };
+      const caption = document.createElement('div'); 
+      caption.className = 'landscape-caption'; 
+      caption.textContent = captionText;
+      item.appendChild(img); 
+      item.appendChild(caption);
+      return item;
     }
     
-    // Функция создания элемента с кругом
     function createWheelItem(originalWheelId, newWheelId) {
-        const item = document.createElement('div');
-        item.className = 'landscape-item';
-        
-        const wrapper = document.createElement('div');
-        wrapper.className = 'wrapper';
-        
-        const wheel = document.getElementById(originalWheelId).cloneNode(true);
-        wheel.id = newWheelId;
-        wheel.classList.add('landscape-wheel');
-        
-        // Очищаем выделение у клонированного колеса
-        Array.from(wheel.children).forEach(child => {
-            child.classList.remove('selected');
-        });
-        
-        wrapper.appendChild(wheel);
-        
-        const highlight = document.createElement('div');
-        highlight.className = 'highlight';
-        wrapper.appendChild(highlight);
-        
-        item.appendChild(wrapper);
-        
-        // Добавляем обработчик скролла
-        wheel.addEventListener('scroll', () => {
-            setTimeout(calc, 50);
-        });
-        
-        return item;
+      const item = document.createElement('div'); 
+      item.className = 'landscape-item';
+      const wrapper = document.createElement('div'); 
+      wrapper.className = 'wrapper';
+      const wheel = document.getElementById(originalWheelId).cloneNode(true);
+      wheel.id = newWheelId; 
+      wheel.classList.add('landscape-wheel');
+      Array.from(wheel.children).forEach(child => child.classList.remove('selected'));
+      wrapper.appendChild(wheel);
+      const highlight = document.createElement('div'); 
+      highlight.className = 'highlight';
+      wrapper.appendChild(highlight);
+      item.appendChild(wrapper);
+      
+      let timer;
+      wheel.addEventListener('scroll', () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => { 
+          snapToCenter(wheel); 
+          calc(); 
+        }, 120);
+      });
+      return item;
     }
     
-    // Функция создания элемента с результатами (широкий)
     function createResultItem() {
-        const item = document.createElement('div');
-        item.className = 'landscape-result';
-        
-        item.innerHTML = `
-            <div>Сумма 2-х измерений: <b id="landscape-sum">0</b> см</div>
-            <div>Размер маски: <b id="landscape-size">-</b></div>
-            <div>Номер упора <span class="lob-text">ЛОБНОЙ</span> лямки: <b id="landscape-lob">-</b></div>
-            <div>Номер упора <span class="vis-text">ВИСОЧНОЙ</span> лямки: <b id="landscape-vis">-</b></div>
-            <div>Номер упора <span class="sh-text">ЩЕЧНОЙ</span> лямки: <b id="landscape-sh">-</b></div>
-        `;
-        
-        return item;
+      const item = document.createElement('div'); 
+      item.className = 'landscape-result';
+      const labelText = currentMode === 'pmg' ? 'Полученный размер:' : 'Сумма 2-х измерений:';
+      item.innerHTML = `
+        <div><span id="landscape-sum-label">${labelText}</span> <b id="landscape-sum">0</b> см</div>
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <span class="size-label">Размер маски:</span>
+          <span id="landscape-size" class="size-badge">-</span>
+        </div>
+        <div class="lob-row">Номер упора <span class="lob-text">ЛОБНОЙ</span> лямки: <b id="landscape-lob">-</b></div>
+        <div class="vis-row">Номер упора <span class="vis-text">ВИСОЧНОЙ</span> лямки: <b id="landscape-vis">-</b></div>
+        <div class="sh-row">Номер упора <span class="sh-text">ЩЕЧНОЙ</span> лямки: <b id="landscape-sh">-</b></div>
+      `;
+      return item;
     }
-    
-    // Добавляем элементы в одной строке: картинка1, круг1, картинка2, круг2, результаты
+
     landscapeContainer.appendChild(createImageItem(originalImages[0].src, originalCaptions[0].textContent, 0));
     landscapeContainer.appendChild(createWheelItem('w1', 'w1-landscape'));
     landscapeContainer.appendChild(createImageItem(originalImages[1].src, originalCaptions[1].textContent, 1));
     landscapeContainer.appendChild(createWheelItem('w2', 'w2-landscape'));
     landscapeContainer.appendChild(createResultItem());
-    
-    // Устанавливаем значения по умолчанию для альбомных колес
-    setLandscapeDefaultValues();
-}
 
-// Следим за изменением ориентации
-function handleOrientationChange() {
-    const landscapeContainer = document.getElementById('landscape-container');
+    setTimeout(() => {
+      // Устанавливаем значения по умолчанию для ландшафтных колес
+      const wheel1 = document.getElementById('w1-landscape');
+      const wheel2 = document.getElementById('w2-landscape');
+      
+      if (wheel1) { 
+        for (let it of wheel1.children) { 
+          if (it.dataset.val == 55.0) { 
+            it.scrollIntoView({ block: 'center' }); 
+            break; 
+          } 
+        }
+      }
+      
+      if (wheel2) { 
+        const targetValue = currentMode === 'pmg' ? 97.0 : 65.0;
+        for (let it of wheel2.children) { 
+          if (it.dataset.val == targetValue) { 
+            it.scrollIntoView({ block: 'center' }); 
+            break; 
+          } 
+        }
+      }
+      
+      // Применяем состояние disabled для первого колеса в ландшафтном режиме
+      const wheels = document.querySelectorAll('.landscape-item .wheel');
+      if (wheels.length >= 2) {
+        if (currentMode === 'pmg') {
+          wheels[0].classList.add('disabled');
+        } else {
+          wheels[0].classList.remove('disabled');
+        }
+      }
+      
+      setTimeout(calc, 100);
+    }, 100);
+  }
+
+  function handleOrientationChange() {
     const imagesRow = document.querySelector('.images-row');
     const wheelsRow = document.querySelector('.wheels-row');
     const portraitResult = document.getElementById('portrait-result');
     
     if (window.matchMedia("(orientation: landscape)").matches) {
-        // Альбомная ориентация
-        if (imagesRow) imagesRow.style.display = 'none';
-        if (wheelsRow) wheelsRow.style.display = 'none';
-        if (portraitResult) portraitResult.style.display = 'none';
-        
-        if (!landscapeContainer.children.length) {
-            createLandscapeView();
-        }
+      // Альбомная - показываем альбомные элементы, скрываем книжные
+      if (imagesRow) imagesRow.style.display = 'none';
+      if (wheelsRow) wheelsRow.style.display = 'none';
+      if (portraitResult) portraitResult.style.display = 'none';
+      if (portraitToggle) portraitToggle.style.display = 'none';
+      if (mainTitle) mainTitle.style.display = 'none';
+      
+      // Показываем альбомные элементы
+      if (landscapeHeader) landscapeHeader.style.display = 'flex';
+      if (landscapeContainer) {
+        if (!landscapeContainer.children.length) createLandscapeView();
         landscapeContainer.style.display = 'flex';
+        
+        // Обновляем состояние disabled для первого колеса
+        const wheels = document.querySelectorAll('.landscape-item .wheel');
+        if (wheels.length >= 2) {
+          if (currentMode === 'pmg') {
+            wheels[0].classList.add('disabled');
+          } else {
+            wheels[0].classList.remove('disabled');
+          }
+        }
+        
+        // Обновляем текст для альбомного режима
+        const landscapeSumLabel = document.getElementById('landscape-sum-label');
+        if (landscapeSumLabel) {
+          landscapeSumLabel.textContent = currentMode === 'pmg' ? 'Полученный размер:' : 'Сумма 2-х измерений:';
+        }
+      }
     } else {
-        // Книжная ориентация
-        if (imagesRow) imagesRow.style.display = 'flex';
-        if (wheelsRow) wheelsRow.style.display = 'flex';
-        if (portraitResult) portraitResult.style.display = 'block';
-        if (landscapeContainer) landscapeContainer.style.display = 'none';
+      // Книжная - показываем книжные элементы, скрываем альбомные
+      if (imagesRow) imagesRow.style.display = 'flex';
+      if (wheelsRow) wheelsRow.style.display = 'flex';
+      if (portraitResult) portraitResult.style.display = 'block';
+      if (portraitToggle) portraitToggle.style.display = 'flex';
+      if (mainTitle) mainTitle.style.display = 'block';
+      
+      if (landscapeHeader) landscapeHeader.style.display = 'none';
+      if (landscapeContainer) landscapeContainer.style.display = 'none';
     }
-    
-    // Пересчитываем значения
     setTimeout(calc, 100);
-}
+  }
 
-// Слушаем изменение ориентации
-window.addEventListener('resize', handleOrientationChange);
-window.addEventListener('orientationchange', handleOrientationChange);
-
-// Запуск
-setDefaultValues();
-setTimeout(calc, 150);
-setTimeout(handleOrientationChange, 200);
+  window.addEventListener('resize', handleOrientationChange);
+  window.addEventListener('orientationchange', handleOrientationChange);
+  
+  // Устанавливаем начальные значения
+  setTimeout(() => {
+    setDefaultValues();
+    setTimeout(calc, 50);
+  }, 100);
+  
+  setTimeout(handleOrientationChange, 200);
+  
+  // Инициализация
+  updateModeUI();
+})();
 </script>
 </body>
 </html>
