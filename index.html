@@ -1,13 +1,9 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#2e7d32">
-<link rel="icon" href="icon-192.png">
-<link rel="apple-touch-icon" href="icon-192.png">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-<title>Подбор противогаза ПМК/ПМГ с озвучкой</title>
+<title>Подбор противогаза ПМК/ПМГ с логом</title>
 <style>
   /* === ОСНОВНЫЕ СТИЛИ === */
   * {
@@ -90,7 +86,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 15px;
+    padding: 8px 12px;
     background: rgba(238, 242, 243, 0.95);
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     backdrop-filter: blur(5px);
@@ -98,106 +94,112 @@
     top: 0;
     z-index: 100;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 6px;
     width: 100%;
   }
   
   .portrait-header .toggle-container {
     margin: 0;
     flex-shrink: 0;
+    gap: 6px;
   }
   
   .portrait-header h1 {
     margin: 0;
     text-align: left;
-    font-size: 20px;
+    font-size: 18px;
     flex-shrink: 0;
+    white-space: nowrap;
   }
   .portrait-header h1 span {
-    font-size: 16px;
+    font-size: 14px;
     margin-top: 2px;
     display: block;
-  }
-  
-  /* Контейнер для настройки времени озвучки - вертикальное исполнение */
-  .speech-delay-container {
-    background: white;
-    padding: 8px 15px;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    min-width: 110px;
-  }
-  
-  .speech-delay-container label {
-    font-size: 14px;
-    font-weight: 600;
-    color: #333;
     white-space: nowrap;
   }
   
-  .speech-delay-container .delay-input-wrapper {
+  /* Контейнер для верхнего ряда (задержка, озвучка, повторы) */
+  .top-controls-row {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
+    flex-wrap: nowrap;
   }
   
-  .speech-delay-container input {
-    width: 60px;
-    padding: 6px 8px;
-    font-size: 16px;
-    border: 2px solid #2e7d32;
+  /* Контейнер для настройки времени озвучки */
+  .speech-delay-container,
+  .speech-toggle-container,
+  .speech-repeat-container {
+    background: white;
+    padding: 4px 8px;
     border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    min-width: auto;
+    flex-shrink: 1;
+  }
+  
+  .speech-delay-container label,
+  .speech-toggle-container label,
+  .speech-repeat-container label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+    white-space: nowrap;
+    margin: 0;
+  }
+  
+  .speech-delay-container .delay-input-wrapper,
+  .speech-repeat-container .repeat-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    flex-shrink: 1;
+  }
+  
+  .speech-delay-container input,
+  .speech-repeat-container input {
+    width: 45px;
+    padding: 4px 4px;
+    font-size: 14px;
+    border: 2px solid #2e7d32;
+    border-radius: 6px;
     text-align: center;
     font-weight: bold;
     outline: none;
   }
   
-  .pmg-mode .speech-delay-container input {
+  .pmg-mode .speech-delay-container input,
+  .pmg-mode .speech-repeat-container input {
     border-color: #b71c1c;
   }
   
-  .speech-delay-container input:focus {
+  .speech-delay-container input:focus,
+  .speech-repeat-container input:focus {
     box-shadow: 0 0 0 3px rgba(46,125,50,0.2);
   }
   
-  .pmg-mode .speech-delay-container input:focus {
+  .pmg-mode .speech-delay-container input:focus,
+  .pmg-mode .speech-repeat-container input:focus {
     box-shadow: 0 0 0 3px rgba(183,28,28,0.2);
   }
   
-  .speech-delay-container .unit {
-    font-size: 14px;
+  .speech-delay-container .unit,
+  .speech-repeat-container .unit {
+    font-size: 12px;
     color: #666;
   }
 
-  /* Контейнер для переключателя озвучки */
-  .speech-toggle-container {
-    background: white;
-    padding: 8px 15px;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    min-width: 90px;
-  }
-  
-  .speech-toggle-container label {
-    font-size: 14px;
-    font-weight: 600;
-    color: #333;
-    white-space: nowrap;
-  }
-  
+  /* Переключатель озвучки */
   .speech-toggle-switch {
     position: relative;
     display: inline-block;
-    width: 50px;
-    height: 24px;
+    width: 44px;
+    height: 22px;
+    flex-shrink: 0;
   }
   
   .speech-toggle-switch input {
@@ -215,14 +217,14 @@
     bottom: 0;
     background-color: #ccc;
     transition: .2s;
-    border-radius: 24px;
+    border-radius: 22px;
   }
   
   .speech-toggle-slider:before {
     position: absolute;
     content: "";
-    height: 18px;
-    width: 18px;
+    height: 16px;
+    width: 16px;
     left: 3px;
     bottom: 3px;
     background-color: white;
@@ -239,13 +241,14 @@
   }
   
   input:checked + .speech-toggle-slider:before {
-    transform: translateX(26px);
+    transform: translateX(22px);
   }
   
   .speech-toggle-status {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: bold;
     color: #666;
+    margin-left: 2px;
   }
   
   .speech-toggle-status.on {
@@ -260,58 +263,84 @@
     color: #999;
   }
 
-  /* Контейнер для количества повторений */
-  .speech-repeat-container {
-    background: white;
-    padding: 8px 15px;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  /* Новая панель для голосового ввода */
+  .voice-input-container {
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    background: white;
+    padding: 4px 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto 5px;
+  }
+  
+  .voice-input-container button {
+    background: #2e7d32;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: 0.2s;
+    white-space: nowrap;
+    display: flex;
     align-items: center;
     gap: 4px;
-    min-width: 90px;
   }
   
-  .speech-repeat-container label {
+  .pmg-mode .voice-input-container button {
+    background: #b71c1c;
+  }
+  
+  .voice-input-container button:hover {
+    transform: scale(1.02);
+    filter: brightness(1.1);
+  }
+  
+  .voice-input-container button:active {
+    transform: scale(0.98);
+  }
+  
+  .voice-input-container button.recording {
+    background: #b71c1c;
+    animation: pulse 1.5s infinite;
+  }
+  
+  .pmg-mode .voice-input-container button.recording {
+    background: #2e7d32;
+  }
+  
+  @keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+  }
+  
+  .voice-display {
+    background: #f0f0f0;
+    padding: 5px 10px;
+    border-radius: 16px;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 500;
     color: #333;
+    min-width: 120px;
+    text-align: left;
+    border: 1px solid #ccc;
+    flex: 1;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   
-  .speech-repeat-container .repeat-input-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  }
-  
-  .speech-repeat-container input {
-    width: 50px;
-    padding: 6px 8px;
-    font-size: 16px;
-    border: 2px solid #2e7d32;
-    border-radius: 8px;
-    text-align: center;
-    font-weight: bold;
-    outline: none;
-  }
-  
-  .pmg-mode .speech-repeat-container input {
-    border-color: #b71c1c;
-  }
-  
-  .speech-repeat-container input:focus {
-    box-shadow: 0 0 0 3px rgba(46,125,50,0.2);
-  }
-  
-  .pmg-mode .speech-repeat-container input:focus {
-    box-shadow: 0 0 0 3px rgba(183,28,28,0.2);
-  }
-  
-  .speech-repeat-container .unit {
-    font-size: 14px;
-    color: #666;
+  .voice-display.empty {
+    color: #999;
+    font-style: italic;
   }
 
   .main-container {
@@ -387,6 +416,12 @@
     pointer-events: none;
     background: #f0f0f0;
   }
+  /* Временная блокировка всех колёс во время озвучки */
+  .wheel.speech-lock {
+    pointer-events: none !important;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+  }
   .value {
     height: 40px;
     display: flex;
@@ -434,7 +469,7 @@
     border-radius: 12px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.15);
     font-size: 18px;
-    margin: 20px 0;
+    margin: 20px 0 10px;
     width: 100%;
     max-width: 400px;
     box-sizing: border-box;
@@ -481,7 +516,138 @@
     display: none;
   }
 
-  @media (max-width:500px) {
+  /* Блок лога под таблицей */
+  .log-panel {
+    background: #2c3e50;
+    color: #ecf0f1;
+    padding: 15px 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    font-size: 14px;
+    margin: 0 0 20px;
+    width: 100%;
+    max-width: 400px;
+    box-sizing: border-box;
+    text-align: left;
+    border-left: 5px solid #2e7d32;
+    font-family: monospace;
+  }
+  
+  .pmg-mode .log-panel {
+    border-left-color: #b71c1c;
+  }
+  
+  .log-panel .log-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #f1c40f;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #455a64;
+    padding-bottom: 5px;
+  }
+  
+  .log-panel .log-title span {
+    color: #ecf0f1;
+    font-size: 14px;
+  }
+  
+  .log-panel .log-entry {
+    padding: 4px 0;
+    border-bottom: 1px dotted #455a64;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .log-panel .log-entry:last-child {
+    border-bottom: none;
+  }
+  
+  .log-panel .log-entry.pmk {
+    color: #a5d6a7;
+  }
+  
+  .log-panel .log-entry.pmg {
+    color: #ef9a9a;
+  }
+  
+  .log-panel .log-empty {
+    color: #95a5a6;
+    font-style: italic;
+    text-align: center;
+    padding: 10px 0;
+  }
+  
+  /* Кнопки действий */
+  .action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 0 0 20px;
+    flex-wrap: wrap;
+    width: 100%;
+    max-width: 400px;
+  }
+  
+  .action-btn {
+    background: #2e7d32;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    transition: 0.2s;
+    flex: 1;
+    min-width: 120px;
+  }
+  
+  .action-btn:hover {
+    transform: scale(1.02);
+    filter: brightness(1.1);
+  }
+  
+  .action-btn.clear {
+    background: #b71c1c;
+  }
+  
+  .pmg-mode .action-btn {
+    background: #b71c1c;
+  }
+  
+  .pmg-mode .action-btn.clear {
+    background: #2e7d32;
+  }
+
+  .action-btn.open {
+    background: #f39c12;
+  }
+  
+  .pmg-mode .action-btn.open {
+    background: #f39c12;
+  }
+
+  @media (max-width:600px) {
+    .portrait-header {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .top-controls-row {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .speech-delay-container,
+    .speech-toggle-container,
+    .speech-repeat-container {
+      flex: 1 1 auto;
+      min-width: 100px;
+    }
     .images-row { gap: 20px; }
     .image-card { width: 140px; }
     .image-card img { width: 120px; }
@@ -490,23 +656,23 @@
     .result { max-width: 300px; padding: 15px; font-size: 16px; }
     .size-label { font-size: 19px; }
     .size-badge { width: 42px; height: 42px; font-size: 24px; }
-    .portrait-header { padding: 8px 10px; }
-    .portrait-header h1 { font-size: 18px; }
-    .portrait-header h1 span { font-size: 14px; }
-    .speech-delay-container { min-width: 90px; padding: 6px 10px; }
-    .speech-delay-container label { font-size: 12px; }
-    .speech-delay-container input { width: 50px; font-size: 14px; padding: 4px; }
-    .speech-toggle-container { min-width: 70px; padding: 6px 10px; }
-    .speech-toggle-container label { font-size: 12px; }
-    .speech-repeat-container { min-width: 70px; padding: 6px 10px; }
-    .speech-repeat-container label { font-size: 12px; }
-    .speech-repeat-container input { width: 40px; font-size: 14px; padding: 4px; }
+    .portrait-header h1 { font-size: 16px; }
+    .portrait-header h1 span { font-size: 12px; }
+    .action-btn { min-width: 100px; padding: 8px 12px; font-size: 14px; }
+    .log-panel { max-width: 300px; padding: 10px; }
+    .log-panel .log-title { font-size: 14px; }
+    .log-panel .log-entry { font-size: 11px; }
   }
 
-  /* АЛЬБОМНАЯ ОРИЕНТАЦИЯ */
+  /* АЛЬБОМНАЯ ОРИЕНТАЦИЯ - полная переработка */
   @media (orientation: landscape) {
-    .main-container { max-width: 100%; padding: 0 15px; }
-    .images-row, .wheels-row, .result { display: none; }
+    body {
+      display: block;
+    }
+    
+    .main-container { 
+      display: none; 
+    }
     
     /* Фиксированная верхняя панель */
     .landscape-header {
@@ -515,12 +681,21 @@
       left: 0;
       right: 0;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      padding: 10px 20px;
+      padding: 8px 20px;
       background: rgba(238, 242, 243, 0.95);
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       z-index: 1000;
       backdrop-filter: blur(5px);
+      gap: 5px;
+    }
+    
+    .landscape-header .top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
       flex-wrap: wrap;
       gap: 10px;
     }
@@ -531,7 +706,7 @@
     }
     
     .landscape-header h1 {
-      margin: 0 0 0 5%;
+      margin: 0;
       text-align: left;
       font-size: 20px;
       flex-shrink: 0;
@@ -542,34 +717,40 @@
       display: block;
     }
     
-    .landscape-header .speech-delay-container {
-      margin: 0;
-      padding: 8px 15px;
-      max-width: 300px;
-      background: rgba(255,255,255,0.9);
-    }
-    
-    .landscape-header .speech-toggle-container {
-      margin: 0;
-      padding: 8px 15px;
-      background: rgba(255,255,255,0.9);
-    }
-    
+    .landscape-header .speech-delay-container,
+    .landscape-header .speech-toggle-container,
     .landscape-header .speech-repeat-container {
       margin: 0;
-      padding: 8px 15px;
+      padding: 4px 10px;
       background: rgba(255,255,255,0.9);
     }
     
+    .landscape-header .voice-input-container {
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    /* Основной контейнер альбомного режима */
+    .landscape-content {
+      margin-top: 130px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+    
+    /* Ряд с картинками и колесами */
     .landscape-row {
       display: flex;
       flex-direction: row;
       justify-content: center;
       align-items: center;
-      gap: 14px;
+      gap: 20px;
       width: 100%;
-      margin: 120px 0 14px;
       flex-wrap: wrap;
+      margin-bottom: 30px;
     }
     
     .landscape-item {
@@ -629,6 +810,8 @@
     .pmg-mode .landscape-item .value.selected {
       color: #b71c1c;
     }
+    
+    /* Результат в альбомном режиме */
     .landscape-result {
       background: white;
       padding: 16px 22px;
@@ -637,7 +820,6 @@
       font-size: 17px;
       min-width: 320px;
       margin-left: 14px;
-      flex-shrink: 0;
     }
     .landscape-result > div {
       margin: 8px 0;
@@ -648,31 +830,49 @@
     }
     .landscape-result b { font-weight: bold; color: #000; }
     
-    /* Стиль для текста "Размер маски" в альбомном режиме */
     .landscape-result .size-label {
       font-size: 20px;
       font-weight: 700;
     }
     
-    /* Стиль для размера маски в альбомном режиме */
     .landscape-result .size-badge {
       width: 44px;
       height: 44px;
       font-size: 26px;
     }
     
-    /* Скрытие строк в альбомном режиме */
     .pmg-mode .landscape-result .lob-row,
     .pmg-mode .landscape-result .vis-row,
     .pmg-mode .landscape-result .sh-row {
       display: none;
+    }
+    
+    /* Лог и кнопки в альбомном режиме */
+    .landscape-footer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      margin-top: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .landscape-footer .log-panel {
+      max-width: 500px;
+      margin: 0;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    
+    .landscape-footer .action-buttons {
+      margin: 0;
+      max-width: 500px;
     }
   }
 
   @media (orientation: landscape) and (min-width: 900px) {
     .landscape-header h1 { 
       font-size: 24px; 
-      margin-left: 10%;
     }
     .landscape-header h1 span { font-size: 18px; }
     .landscape-item { min-width: 110px; }
@@ -684,7 +884,7 @@
     .landscape-result .size-badge { width: 52px; height: 52px; font-size: 32px; }
   }
   @media (orientation: landscape) and (min-width: 1200px) {
-    .landscape-header h1 { margin-left: 15%; }
+    .landscape-header h1 { margin-left: 0; }
     .landscape-result { min-width: 460px; font-size: 22px; }
     .landscape-result .size-label { font-size: 25px; }
   }
@@ -694,84 +894,104 @@
 
 <!-- Книжная версия верхней панели -->
 <div class="portrait-header" id="portraitHeader">
-  <div class="toggle-container" id="portraitToggle">
-    <span class="toggle-label pmk" id="pmkLabel">ПМК</span>
-    <label class="switch">
-      <input type="checkbox" id="modelToggle">
-      <span class="slider"></span>
-    </label>
-    <span class="toggle-label pmg" id="pmgLabel">ПМГ</span>
+  <!-- Первая строка: переключатель и заголовок -->
+  <div style="display: flex; align-items: center; gap: 10px; width: 100%;">
+    <div class="toggle-container" id="portraitToggle">
+      <span class="toggle-label pmk" id="pmkLabel">ПМК</span>
+      <label class="switch">
+        <input type="checkbox" id="modelToggle">
+        <span class="slider"></span>
+      </label>
+      <span class="toggle-label pmg" id="pmgLabel">ПМГ</span>
+    </div>
+    
+    <h1 id="mainTitle">ПОДБОР<br><span id="subtitleSpan">ПРОТИВОГАЗА ПМК</span></h1>
   </div>
   
-  <h1 id="mainTitle">ПОДБОР<br><span id="subtitleSpan">ПРОТИВОГАЗА ПМК</span></h1>
-  
-  <!-- Вертикальный контейнер для настройки времени озвучки -->
-  <div class="speech-delay-container" id="portraitDelayContainer">
-    <label for="speechDelay">Задержка</label>
-    <div class="delay-input-wrapper">
-      <input type="number" id="speechDelay" min="0" max="30" step="0.5" value="2">
-      <span class="unit">сек</span>
+  <!-- Вторая строка: задержка, озвучка, повторы -->
+  <div class="top-controls-row">
+    <!-- Контейнер для настройки времени озвучки -->
+    <div class="speech-delay-container" id="portraitDelayContainer">
+      <label for="speechDelay">Задержка</label>
+      <div class="delay-input-wrapper">
+        <input type="number" id="speechDelay" min="0" max="30" step="0.5" value="2">
+        <span class="unit">сек</span>
+      </div>
+    </div>
+    
+    <!-- Контейнер для переключателя озвучки -->
+    <div class="speech-toggle-container" id="portraitSpeechToggleContainer">
+      <label>Озвучка</label>
+      <label class="speech-toggle-switch">
+        <input type="checkbox" id="speechToggle">
+        <span class="speech-toggle-slider"></span>
+      </label>
+      <span class="speech-toggle-status off" id="speechToggleStatus">выкл</span>
+    </div>
+    
+    <!-- Контейнер для количества повторений -->
+    <div class="speech-repeat-container" id="portraitRepeatContainer">
+      <label for="speechRepeat">Повторов</label>
+      <div class="repeat-input-wrapper">
+        <input type="number" id="speechRepeat" min="1" max="10" step="1" value="2">
+        <span class="unit">раз</span>
+      </div>
     </div>
   </div>
   
-  <!-- Вертикальный контейнер для переключателя озвучки -->
-  <div class="speech-toggle-container" id="portraitSpeechToggleContainer">
-    <label>Озвучка</label>
-    <label class="speech-toggle-switch">
-      <input type="checkbox" id="speechToggle">
-      <span class="speech-toggle-slider"></span>
-    </label>
-    <span class="speech-toggle-status off" id="speechToggleStatus">выкл</span>
-  </div>
-  
-  <!-- Вертикальный контейнер для количества повторений -->
-  <div class="speech-repeat-container" id="portraitRepeatContainer">
-    <label for="speechRepeat">Повторов</label>
-    <div class="repeat-input-wrapper">
-      <input type="number" id="speechRepeat" min="1" max="10" step="1" value="2">
-      <span class="unit">раз</span>
-    </div>
+  <!-- Третья строка: голосовой ввод -->
+  <div class="voice-input-container" id="voiceInputContainer">
+    <button id="voiceRecordBtn" class="voice-btn">🎤 Ввести голосом</button>
+    <div id="voiceDisplay" class="voice-display empty">не указано</div>
   </div>
 </div>
 
 <!-- Альбомная версия верхней панели (изначально скрыта) -->
 <div class="landscape-header" id="landscapeHeader" style="display: none;">
-  <div class="toggle-container" id="landscapeToggle">
-    <span class="toggle-label pmk" id="pmkLabelLandscape">ПМК</span>
-    <label class="switch">
-      <input type="checkbox" id="modelToggleLandscape">
-      <span class="slider"></span>
-    </label>
-    <span class="toggle-label pmg" id="pmgLabelLandscape">ПМГ</span>
-  </div>
-  <h1 id="landscapeTitle">ПОДБОР<br><span id="subtitleSpanLandscape">ПРОТИВОГАЗА ПМК</span></h1>
-  
-  <!-- Контейнер для настройки времени озвучки (альбомный) -->
-  <div class="speech-delay-container" id="landscapeDelayContainer">
-    <label for="speechDelayLandscape">Задержка</label>
-    <div class="delay-input-wrapper">
-      <input type="number" id="speechDelayLandscape" min="0" max="30" step="0.5" value="2">
-      <span class="unit">сек</span>
+  <div class="top-row">
+    <div class="toggle-container" id="landscapeToggle">
+      <span class="toggle-label pmk" id="pmkLabelLandscape">ПМК</span>
+      <label class="switch">
+        <input type="checkbox" id="modelToggleLandscape">
+        <span class="slider"></span>
+      </label>
+      <span class="toggle-label pmg" id="pmgLabelLandscape">ПМГ</span>
+    </div>
+    <h1 id="landscapeTitle">ПОДБОР<br><span id="subtitleSpanLandscape">ПРОТИВОГАЗА ПМК</span></h1>
+    
+    <!-- Контейнер для настройки времени озвучки (альбомный) -->
+    <div class="speech-delay-container" id="landscapeDelayContainer">
+      <label for="speechDelayLandscape">Задержка</label>
+      <div class="delay-input-wrapper">
+        <input type="number" id="speechDelayLandscape" min="0" max="30" step="0.5" value="2">
+        <span class="unit">сек</span>
+      </div>
+    </div>
+    
+    <!-- Контейнер для переключателя озвучки (альбомный) -->
+    <div class="speech-toggle-container" id="landscapeSpeechToggleContainer">
+      <label>Озвучка</label>
+      <label class="speech-toggle-switch">
+        <input type="checkbox" id="speechToggleLandscape">
+        <span class="speech-toggle-slider"></span>
+      </label>
+      <span class="speech-toggle-status off" id="speechToggleStatusLandscape">выкл</span>
+    </div>
+    
+    <!-- Контейнер для количества повторений (альбомный) -->
+    <div class="speech-repeat-container" id="landscapeRepeatContainer">
+      <label for="speechRepeatLandscape">Повторов</label>
+      <div class="repeat-input-wrapper">
+        <input type="number" id="speechRepeatLandscape" min="1" max="10" step="1" value="2">
+        <span class="unit">раз</span>
+      </div>
     </div>
   </div>
   
-  <!-- Контейнер для переключателя озвучки (альбомный) -->
-  <div class="speech-toggle-container" id="landscapeSpeechToggleContainer">
-    <label>Озвучка</label>
-    <label class="speech-toggle-switch">
-      <input type="checkbox" id="speechToggleLandscape">
-      <span class="speech-toggle-slider"></span>
-    </label>
-    <span class="speech-toggle-status off" id="speechToggleStatusLandscape">выкл</span>
-  </div>
-  
-  <!-- Контейнер для количества повторений (альбомный) -->
-  <div class="speech-repeat-container" id="landscapeRepeatContainer">
-    <label for="speechRepeatLandscape">Повторов</label>
-    <div class="repeat-input-wrapper">
-      <input type="number" id="speechRepeatLandscape" min="1" max="10" step="1" value="2">
-      <span class="unit">раз</span>
-    </div>
+  <!-- Голосовой ввод для альбомной версии -->
+  <div class="voice-input-container" id="landscapeVoiceContainer">
+    <button id="voiceRecordBtnLandscape" class="voice-btn">🎤 Ввести голосом</button>
+    <div id="voiceDisplayLandscape" class="voice-display empty">не указано</div>
   </div>
 </div>
 
@@ -814,16 +1034,31 @@
     <div class="vis-row">Номер упора <span class="vis-text">ВИСОЧНОЙ</span> лямки: <b id="vis">-</b></div>
     <div class="sh-row">Номер упора <span class="sh-text">ЩЕЧНОЙ</span> лямки: <b id="sh">-</b></div>
   </div>
+  
+  <!-- Панель лога под таблицей (книжная версия) -->
+  <div class="log-panel" id="logPanel">
+    <div class="log-title">
+      ЖУРНАЛ ИЗМЕРЕНИЙ
+      <span id="logCount">0</span>
+    </div>
+    <div id="logEntries"></div>
+  </div>
+  
+  <!-- Кнопки действий (книжная версия) -->
+  <div class="action-buttons">
+    <button class="action-btn" id="downloadLogBtn">💾 Сохранить лог</button>
+    <button class="action-btn open" id="openLogBtn">📂 Открыть лог</button>
+    <button class="action-btn clear" id="clearLogBtn">🗑️ Очистить</button>
+  </div>
 </div>
 
 <!-- Контейнер для альбомной версии контента -->
-<div id="landscape-container"></div>
+<div id="landscape-content" class="landscape-content" style="display: none;"></div>
 
 <script>
 (function() {
   // Элементы книжной версии
   const portraitHeader = document.getElementById('portraitHeader');
-  const portraitToggle = document.getElementById('portraitToggle');
   const mainTitle = document.getElementById('mainTitle');
   const subtitleSpan = document.getElementById('subtitleSpan');
   const mainContainer = document.getElementById('mainContainer');
@@ -835,10 +1070,9 @@
   
   // Элементы альбомной версии
   const landscapeHeader = document.getElementById('landscapeHeader');
-  const landscapeToggle = document.getElementById('landscapeToggle');
   const landscapeTitle = document.getElementById('landscapeTitle');
   const subtitleSpanLandscape = document.getElementById('subtitleSpanLandscape');
-  const landscapeContainer = document.getElementById('landscape-container');
+  const landscapeContent = document.getElementById('landscape-content');
   const speechDelayLandscape = document.getElementById('speechDelayLandscape');
   const speechToggleLandscape = document.getElementById('speechToggleLandscape');
   const speechToggleStatusLandscape = document.getElementById('speechToggleStatusLandscape');
@@ -853,21 +1087,62 @@
   const pmgLabel = document.getElementById('pmgLabel');
   const pmkLabelLandscape = document.getElementById('pmkLabelLandscape');
   const pmgLabelLandscape = document.getElementById('pmgLabelLandscape');
+  
+  // Элементы лога
+  const logPanel = document.getElementById('logPanel');
+  const logCount = document.getElementById('logCount');
+  const logEntries = document.getElementById('logEntries');
+
+  // Элементы голосового ввода
+  const voiceRecordBtn = document.getElementById('voiceRecordBtn');
+  const voiceDisplay = document.getElementById('voiceDisplay');
+  const voiceRecordBtnLandscape = document.getElementById('voiceRecordBtnLandscape');
+  const voiceDisplayLandscape = document.getElementById('voiceDisplayLandscape');
+
+  // Кнопки
+  const downloadBtn = document.getElementById('downloadLogBtn');
+  const openBtn = document.getElementById('openLogBtn');
+  const clearBtn = document.getElementById('clearLogBtn');
 
   let currentMode = 'pmk';
   let speechTimeout = null;
   let repeatInterval = null;
   let currentRepeatCount = 0;
   let totalRepeats = 1;
-  let lastTextToSpeak = '';
+  
+  // === ПЕРЕМЕННЫЕ ДЛЯ ОТСЛЕЖИВАНИЯ ИЗМЕНЕНИЙ ===
+  let lastWheel1Value = 55.0;
+  let lastWheel2Value = 65.0;
+  let lastMode = 'pmk';
+  let speechScheduled = false;
+  let isInitialLoad = true; // Флаг начальной загрузки
+  let isOrientationChanging = false; // Флаг изменения ориентации
+  
+  // Дополнительные флаги для контроля озвучки
+  let wheel1Changed = false; // Флаг, что первое колесо было изменено (для режима ПМК)
+  let wheel2Changed = false; // Флаг, что второе колесо было изменено
+  
+  // Переменная для хранения введённого голосом текста
+  let voiceInputText = '';
+  
+  // Буфер для лога
+  let logBuffer = [];
+  
+  // Загружаем сохраненный лог из localStorage при старте
+  try {
+    const savedLog = localStorage.getItem('measurements_log');
+    if (savedLog) {
+      logBuffer = JSON.parse(savedLog);
+    }
+  } catch (e) {
+    console.log('Ошибка загрузки лога', e);
+  }
 
   // Функция для проверки включена ли озвучка
   function isSpeechEnabled() {
     if (window.matchMedia("(orientation: landscape)").matches) {
-      // Альбомная ориентация
       return speechToggleLandscape ? speechToggleLandscape.checked : true;
     } else {
-      // Книжная ориентация
       return speechToggle ? speechToggle.checked : true;
     }
   }
@@ -875,15 +1150,13 @@
   // Функция для получения количества повторений
   function getRepeatCount() {
     if (window.matchMedia("(orientation: landscape)").matches) {
-      // Альбомная ориентация
       return speechRepeatLandscape ? parseInt(speechRepeatLandscape.value) || 1 : 1;
     } else {
-      // Книжная ориентация
       return speechRepeatInput ? parseInt(speechRepeatInput.value) || 1 : 1;
     }
   }
 
-  // Функция для обновления статуса озвучки (текст вкл/выкл)
+  // Функция для обновления статуса озвучки
   function updateSpeechToggleStatus() {
     const enabled = isSpeechEnabled();
     const statusText = enabled ? 'вкл' : 'выкл';
@@ -912,7 +1185,7 @@
     updateSpeechToggleStatus();
   }
 
-  // Синхронизация полей ввода времени между книжной и альбомной версиями
+  // Синхронизация полей ввода времени
   function syncDelayInputs() {
     if (speechDelayInput && speechDelayLandscape) {
       if (window.matchMedia("(orientation: landscape)").matches) {
@@ -934,42 +1207,55 @@
     }
   }
 
-  // Функция для получения текущего времени задержки (в миллисекундах)
+  // Функция для синхронизации голосового поля
+  function syncVoiceDisplay() {
+    const text = voiceInputText || 'не указано';
+    const className = voiceInputText ? '' : 'empty';
+    if (voiceDisplay) {
+      voiceDisplay.innerText = text;
+      voiceDisplay.className = 'voice-display ' + (voiceInputText ? '' : 'empty');
+    }
+    if (voiceDisplayLandscape) {
+      voiceDisplayLandscape.innerText = text;
+      voiceDisplayLandscape.className = 'voice-display ' + (voiceInputText ? '' : 'empty');
+    }
+  }
+
+  // Функция для очистки голосового поля
+  function clearVoiceInput() {
+    voiceInputText = '';
+    syncVoiceDisplay();
+  }
+
+  // Функция для получения текущего времени задержки
   function getCurrentDelay() {
-    let delaySeconds = 2; // значение по умолчанию изменено на 2
+    let delaySeconds = 2;
     
     if (window.matchMedia("(orientation: landscape)").matches) {
-      // Альбомная ориентация
       if (speechDelayLandscape) {
         delaySeconds = parseFloat(speechDelayLandscape.value) || 2;
       }
     } else {
-      // Книжная ориентация
       if (speechDelayInput) {
         delaySeconds = parseFloat(speechDelayInput.value) || 2;
       }
     }
     
-    // Преобразуем секунды в миллисекунды, но не меньше 0
     return Math.max(0, delaySeconds) * 1000;
   }
 
-  // Функция для формирования текста озвучки на основе текущих данных
+  // Функция для формирования текста озвучки
   function getCurrentSpeechText() {
     const isPmg = currentMode === 'pmg';
     
-    // Получаем актуальные значения из DOM
     const size = document.getElementById('size').innerText;
     const lob = document.getElementById('lob').innerText;
     const vis = document.getElementById('vis').innerText;
     const sh = document.getElementById('sh').innerText;
 
     if (isPmg) {
-      // Для ПМГ произносим одной фразой (по словам, а не по буквам)
       return [`Противогаз ПМГ, размер маски ${size}`];
     } else {
-      // Для ПМК возвращаем массив фраз для последовательного воспроизведения с паузами
-      // ИСПРАВЛЕНО: добавлен символ ударения для слова "височный"
       return [
         `Противогаз ПМК размер маски ${size}`,
         `лобный упор ${lob}`,
@@ -978,87 +1264,302 @@
       ];
     }
   }
-
-  function stopCurrentSpeech() {
-    // Отменяем таймеры и интервалы
-    if (speechTimeout) {
-      clearTimeout(speechTimeout);
-      speechTimeout = null;
+  
+  // Функция для форматирования текущей даты и времени (только для лога, не используется в отображении)
+  function getCurrentDateTimeFormatted() {
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year = now.getFullYear();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    return `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
+  }
+  
+  // Функция для формирования короткого отображения в журнале на экране
+  function getShortDisplayString(fullLogString) {
+    // Извлекаем номер записи и данные для краткого отображения
+    // Пример входящей строки: "1). 17.03.2026 18.05.33 ПМК: р2-л3-в5-щ5 (майор Иванов команда 22566)"
+    // Нужно вернуть: "ПМК: р2-л3-в5-щ5 (Иванов)"
+    
+    // Сначала извлекаем часть после даты
+    const match = fullLogString.match(/\d+\)\. \d+\.\d+\.\d+ \d+:\d+:\d+ (.+)/);
+    if (!match) return fullLogString;
+    
+    const afterDate = match[1]; // "ПМК: р2-л3-в5-щ5 (майор Иванов команда 22566)"
+    
+    // Извлекаем основную часть до скобок и содержимое скобок
+    const mainMatch = afterDate.match(/^(.+?) \((.+)\)$/);
+    if (!mainMatch) return afterDate;
+    
+    const mainPart = mainMatch[1]; // "ПМК: р2-л3-в5-щ5"
+    const fullVoice = mainMatch[2]; // "майор Иванов команда 22566"
+    
+    // Извлекаем только фамилию (второе слово) или первое слово если только одно
+    const words = fullVoice.trim().split(/\s+/);
+    let surname = words.length >= 2 ? words[1] : words[0];
+    
+    return `${mainPart} (${surname})`;
+  }
+  
+  // Функция для формирования полной строки лога для файла
+  function getFullLogString() {
+    const isPmg = currentMode === 'pmg';
+    const dateTimeStr = getCurrentDateTimeFormatted();
+    const size = document.getElementById('size').innerText;
+    
+    const recordNumber = logBuffer.length + 1;
+    
+    let mainPart;
+    if (isPmg) {
+      mainPart = `МПГ: р${size}`;
+    } else {
+      const lob = document.getElementById('lob').innerText;
+      const vis = document.getElementById('vis').innerText;
+      const sh = document.getElementById('sh').innerText;
+      mainPart = `ПМК: р${size}-л${lob}-в${vis}-щ${sh}`;
     }
     
-    if (repeatInterval) {
-      clearInterval(repeatInterval);
-      repeatInterval = null;
+    // Добавляем весь голосовой текст в скобках (если есть)
+    const voicePart = voiceInputText ? ` (${voiceInputText})` : ' ()';
+    
+    return `${recordNumber}). ${dateTimeStr} ${mainPart}${voicePart}`;
+  }
+  
+  // Функция для обновления отображения лога
+  function updateLogDisplay() {
+    // Обновляем счетчик
+    if (logCount) {
+      logCount.innerText = `всего: ${logBuffer.length}`;
     }
     
-    // Останавливаем текущее воспроизведение
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
+    // Очищаем контейнер записей
+    if (logEntries) {
+      logEntries.innerHTML = '';
+      
+      if (logBuffer.length === 0) {
+        // Показываем заглушку если лог пуст
+        const emptyDiv = document.createElement('div');
+        emptyDiv.className = 'log-empty';
+        emptyDiv.innerText = 'Нет записей';
+        logEntries.appendChild(emptyDiv);
+      } else {
+        // Показываем последние 4 записи (в обратном порядке - новые сверху)
+        const lastEntries = logBuffer.slice(-4).reverse();
+        
+        for (let i = 0; i < lastEntries.length; i++) {
+          const entryDiv = document.createElement('div');
+          entryDiv.className = 'log-entry';
+          
+          // Добавляем класс в зависимости от типа записи
+          if (lastEntries[i].includes('ПМК')) {
+            entryDiv.classList.add('pmk');
+          } else {
+            entryDiv.classList.add('pmg');
+          }
+          
+          const shortStr = getShortDisplayString(lastEntries[i]);
+          entryDiv.innerText = shortStr;
+          logEntries.appendChild(entryDiv);
+        }
+      }
     }
     
-    currentRepeatCount = 0;
+    // Обновляем лог в альбомном режиме, если он существует
+    const landscapeLogEntries = document.getElementById('landscapeLogEntries');
+    if (landscapeLogEntries) {
+      landscapeLogEntries.innerHTML = '';
+      
+      if (logBuffer.length === 0) {
+        const emptyDiv = document.createElement('div');
+        emptyDiv.className = 'log-empty';
+        emptyDiv.innerText = 'Нет записей';
+        landscapeLogEntries.appendChild(emptyDiv);
+      } else {
+        const lastEntries = logBuffer.slice(-4).reverse();
+        
+        for (let i = 0; i < lastEntries.length; i++) {
+          const entryDiv = document.createElement('div');
+          entryDiv.className = 'log-entry';
+          
+          if (lastEntries[i].includes('ПМК')) {
+            entryDiv.classList.add('pmk');
+          } else {
+            entryDiv.classList.add('pmg');
+          }
+          
+          const shortStr = getShortDisplayString(lastEntries[i]);
+          entryDiv.innerText = shortStr;
+          landscapeLogEntries.appendChild(entryDiv);
+        }
+      }
+    }
+    
+    const landscapeLogCount = document.getElementById('landscapeLogCount');
+    if (landscapeLogCount) {
+      landscapeLogCount.innerText = `всего: ${logBuffer.length}`;
+    }
   }
 
-  function startSpeechWithRepeat() {
-    if (!isSpeechEnabled()) return;
+  // === ФУНКЦИЯ ДЛЯ ПОЛУЧЕНИЯ ТЕКУЩИХ ЗНАЧЕНИЙ КОЛЕС ===
+  function getCurrentWheelValues() {
+    let wheel1, wheel2;
     
-    const speechParts = getCurrentSpeechText();
-    totalRepeats = getRepeatCount();
-    currentRepeatCount = 0;
-    
-    // Функция для воспроизведения одной части фразы
-    function speakPart(index, onComplete) {
-      if (!isSpeechEnabled() || index >= speechParts.length) {
-        if (onComplete) onComplete();
-        return;
+    if (window.matchMedia("(orientation: landscape)").matches) {
+      const w1 = document.getElementById('w1-landscape');
+      const w2 = document.getElementById('w2-landscape');
+      if (w1 && w2) {
+        wheel1 = getCenterValue(w1);
+        wheel2 = getCenterValue(w2);
+      } else {
+        wheel1 = getCenterValue(document.getElementById('w1'));
+        wheel2 = getCenterValue(document.getElementById('w2'));
       }
-      
-      const utterance = new SpeechSynthesisUtterance(speechParts[index]);
-      utterance.lang = 'ru-RU';
-      utterance.rate = 0.9;
-      utterance.pitch = 1;
-      
-      utterance.onend = function() {
-        // После каждой части делаем паузу 1 секунда, если это не последняя часть
-        if (index < speechParts.length - 1) {
-          setTimeout(() => {
-            speakPart(index + 1, onComplete);
-          }, 1000); // Пауза 1 секунда между частями
+    } else {
+      wheel1 = getCenterValue(document.getElementById('w1'));
+      wheel2 = getCenterValue(document.getElementById('w2'));
+    }
+    
+    return { wheel1, wheel2 };
+  }
+
+  // === ФУНКЦИЯ: проверка изменились ли значения ===
+  function haveWheelsChanged() {
+    const { wheel1, wheel2 } = getCurrentWheelValues();
+    
+    // Проверяем изменения
+    const wheel1Changed = Math.abs(wheel1 - lastWheel1Value) > 0.01;
+    const wheel2Changed = Math.abs(wheel2 - lastWheel2Value) > 0.01;
+    const modeChanged = lastMode !== currentMode;
+    
+    return wheel1Changed || wheel2Changed || modeChanged;
+  }
+
+  // === ФУНКЦИЯ ДЛЯ ОБНОВЛЕНИЯ СОХРАНЕННЫХ ЗНАЧЕНИЙ ===
+  function updateSavedValues() {
+    const { wheel1, wheel2 } = getCurrentWheelValues();
+    lastWheel1Value = wheel1;
+    lastWheel2Value = wheel2;
+    lastMode = currentMode;
+  }
+
+  // === БЛОКИРОВКА КОЛЁС ПО РЕЖИМУ ===
+  function applyModeLock() {
+    const isPmg = currentMode === 'pmg';
+    const allWheels = document.querySelectorAll('.wheel');
+    
+    allWheels.forEach((wheel, index) => {
+      // Чётные индексы (0,2,4...) — первое колесо (w1, w1-landscape)
+      if (index % 2 === 0) {
+        if (isPmg) {
+          wheel.classList.add('disabled');
         } else {
-          // Все части воспроизведены
-          if (onComplete) onComplete();
+          wheel.classList.remove('disabled');
         }
-      };
-      
-      window.speechSynthesis.speak(utterance);
-    }
-    
-    // Функция для воспроизведения полной фразы (всех частей)
-    function speakFullPhrase() {
-      if (!isSpeechEnabled()) {
-        stopCurrentSpeech();
-        return;
+      } else {
+        // Нечётные — второе колесо (w2, w2-landscape) всегда доступно (кроме временной блокировки озвучкой)
+        wheel.classList.remove('disabled');
       }
-      
-      speakPart(0, function() {
-        currentRepeatCount++;
-        if (currentRepeatCount < totalRepeats && isSpeechEnabled()) {
-          setTimeout(() => {
-            if (isSpeechEnabled()) {
-              speakFullPhrase();
-            }
-          }, 1000); // Пауза 1 секунда между повторениями
-        }
-      });
-    }
-    
-    // Запускаем первое воспроизведение
-    speakFullPhrase();
+    });
   }
 
-  function speakResult() {
-    // Останавливаем текущее воспроизведение
-    stopCurrentSpeech();
+  // === ВРЕМЕННАЯ БЛОКИРОВКА ВСЕХ КОЛЁС НА ВРЕМЯ ОЗВУЧКИ ===
+  function setSpeechLock(lock) {
+    const allWheels = document.querySelectorAll('.wheel');
+    allWheels.forEach(wheel => {
+      if (lock) {
+        wheel.classList.add('speech-lock');
+      } else {
+        wheel.classList.remove('speech-lock');
+      }
+    });
+  }
+
+  // === ФУНКЦИЯ ДЛЯ ГОЛОСОВОГО ВВОДА ===
+  function startVoiceRecognition(buttonElement, displayElement) {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      alert('Извините, ваш браузер не поддерживает голосовой ввод. Попробуйте Chrome или Edge.');
+      return;
+    }
+    
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'ru-RU';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    
+    // Визуальный отклик
+    buttonElement.classList.add('recording');
+    const originalText = buttonElement.innerText;
+    buttonElement.innerText = '🎤 Слушаю...';
+    
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      voiceInputText = transcript.trim();
+      syncVoiceDisplay();
+    };
+    
+    recognition.onerror = (event) => {
+      console.log('Ошибка распознавания:', event.error);
+      if (event.error === 'no-speech') {
+        alert('Речь не обнаружена. Попробуйте ещё раз.');
+      }
+    };
+    
+    recognition.onend = () => {
+      buttonElement.classList.remove('recording');
+      buttonElement.innerText = originalText;
+    };
+    
+    recognition.start();
+  }
+
+  // === ИСПРАВЛЕННАЯ ФУНКЦИЯ speakResult ===
+  function speakResult(fromWheelChange = false, changedWheel = null) {
+    // Если это начальная загрузка или изменение ориентации, не озвучиваем
+    if (isInitialLoad || isOrientationChanging) {
+      console.log('Начальная загрузка или смена ориентации, пропускаем озвучку');
+      return;
+    }
+    
+    // Для режима ПМК: озвучиваем только если изменено второе колесо
+    if (currentMode === 'pmk') {
+      // Если это изменение от колеса, проверяем какое колесо было изменено
+      if (fromWheelChange) {
+        if (changedWheel === 1) {
+          // Изменено первое колесо - не озвучиваем, просто запоминаем факт изменения
+          console.log('Изменено первое колесо в режиме ПМК, озвучка не требуется');
+          wheel1Changed = true;
+          return;
+        } else if (changedWheel === 2) {
+          // Изменено второе колесо - озвучиваем
+          console.log('Изменено второе колесо в режиме ПМК, запускаем озвучку');
+          wheel2Changed = true;
+          // Продолжаем выполнение функции для озвучки
+        }
+      } else {
+        // Если вызов не от колеса (например, смена режима), проверяем были ли изменения
+        if (!wheel2Changed && !haveWheelsChanged()) {
+          console.log('Не было изменений второго колеса, пропускаем озвучку');
+          return;
+        }
+        // Сбрасываем флаги после озвучки
+      }
+    } else {
+      // Для режима ПМГ: озвучиваем при любом изменении
+      if (!fromWheelChange && !haveWheelsChanged()) {
+        console.log('Значения не изменились, пропускаем озвучку');
+        return;
+      }
+    }
+
+    // Если уже запланирована озвучка, отменяем предыдущую
+    if (speechScheduled) {
+      stopCurrentSpeech();
+      speechScheduled = false;
+    }
 
     // Если озвучка отключена, ничего не делаем
     if (!isSpeechEnabled()) {
@@ -1073,297 +1574,53 @@
       return;
     }
 
-    // Устанавливаем новый таймер с пользовательской задержкой
+    // Устанавливаем флаг и новый таймер
+    speechScheduled = true;
     speechTimeout = setTimeout(() => {
       startSpeechWithRepeat();
       speechTimeout = null;
+      speechScheduled = false;
     }, delayMs);
   }
 
-  // Обработчики изменения полей ввода
-  if (speechDelayInput) {
-    speechDelayInput.addEventListener('input', function() {
-      if (speechDelayLandscape) {
-        speechDelayLandscape.value = this.value;
-      }
-      speakResult();
-    });
-  }
-  
-  if (speechDelayLandscape) {
-    speechDelayLandscape.addEventListener('input', function() {
-      if (speechDelayInput) {
-        speechDelayInput.value = this.value;
-      }
-      speakResult();
-    });
-  }
-
-  // Обработчики для полей повторений
-  if (speechRepeatInput) {
-    speechRepeatInput.addEventListener('input', function() {
-      if (speechRepeatLandscape) {
-        speechRepeatLandscape.value = this.value;
-      }
-      // Не перезапускаем автоматически, только при следующем воспроизведении
-    });
-  }
-  
-  if (speechRepeatLandscape) {
-    speechRepeatLandscape.addEventListener('input', function() {
-      if (speechRepeatInput) {
-        speechRepeatInput.value = this.value;
-      }
-    });
-  }
-
-  // Обработчики для переключателей озвучки
-  if (speechToggle) {
-    speechToggle.addEventListener('change', function() {
-      if (speechToggleLandscape) {
-        speechToggleLandscape.checked = this.checked;
-      }
-      updateSpeechToggleStatus();
-      
-      if (!this.checked) {
-        stopCurrentSpeech();
-      } else {
-        speakResult();
-      }
-    });
-  }
-  
-  if (speechToggleLandscape) {
-    speechToggleLandscape.addEventListener('change', function() {
-      if (speechToggle) {
-        speechToggle.checked = this.checked;
-      }
-      updateSpeechToggleStatus();
-      
-      if (!this.checked) {
-        stopCurrentSpeech();
-      } else {
-        speakResult();
-      }
-    });
-  }
-
-  function updateModeUI() {
-    const isPmg = currentMode === 'pmg';
-    const modeText = isPmg ? 'ПРОТИВОГАЗА ПМГ' : 'ПРОТИВОГАЗА ПМК';
-    const modeClass = isPmg ? 'pmg-mode' : '';
-    
-    // Обновляем книжные элементы
-    subtitleSpan.innerText = modeText;
-    subtitleSpan.className = modeClass;
-    
-    // Меняем текст "Сумма 2-х измерений" на "Полученный размер" для ПМГ
-    if (sumLabel) {
-      const labelText = sumLabel.childNodes[0];
-      if (labelText) {
-        labelText.textContent = isPmg ? 'Полученный размер: ' : 'Сумма 2-х измерений: ';
-      }
-    }
-    
-    // Обновляем альбомные элементы
-    if (subtitleSpanLandscape) {
-      subtitleSpanLandscape.innerText = modeText;
-      subtitleSpanLandscape.className = modeClass;
-    }
-    
-    // Обновляем текст в альбомном результате
-    const landscapeSumLabel = document.getElementById('landscape-sum-label');
-    if (landscapeSumLabel) {
-      landscapeSumLabel.textContent = isPmg ? 'Полученный размер:' : 'Сумма 2-х измерений:';
-    }
-    
-    document.body.classList.toggle('pmg-mode', isPmg);
-    
-    // Синхронизируем чекбоксы
-    if (portraitCheckbox) portraitCheckbox.checked = isPmg;
-    if (landscapeCheckbox) landscapeCheckbox.checked = isPmg;
-    
-    // Обновляем цвета меток
-    const pmkColor = isPmg ? '#777' : '#2e7d32';
-    const pmgColor = isPmg ? '#b71c1c' : '#777';
-    
-    if (pmkLabel) pmkLabel.style.color = pmkColor;
-    if (pmgLabel) pmgLabel.style.color = pmgColor;
-    if (pmkLabelLandscape) pmkLabelLandscape.style.color = pmkColor;
-    if (pmgLabelLandscape) pmgLabelLandscape.style.color = pmgColor;
-    
-    // Блокировка/разблокировка первого колеса для всех колес
-    const allWheels = document.querySelectorAll('.wheel');
-    allWheels.forEach((wheel, index) => {
-      // Блокируем первое колесо в каждой паре
-      if (index % 2 === 0) {
-        if (isPmg) {
-          wheel.classList.add('disabled');
+  // === ИСПРАВЛЕННАЯ ФУНКЦИЯ ДЛЯ ОБРАБОТКИ СКРОЛЛА КОЛЕС ===
+  function handleWheelScroll(wheel) {
+    return function() {
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(() => { 
+        snapToCenter(wheel); 
+        
+        // Получаем новые значения после центрирования
+        const newValue = getCenterValue(wheel);
+        
+        // Определяем какое колесо было изменено
+        let changedWheel = null;
+        let valueChanged = false;
+        
+        if (wheel.id === 'w1' || wheel.id === 'w1-landscape') {
+          valueChanged = Math.abs(newValue - lastWheel1Value) > 0.01;
+          if (valueChanged) {
+            lastWheel1Value = newValue;
+            changedWheel = 1;
+          }
         } else {
-          wheel.classList.remove('disabled');
-        }
-      }
-    });
-    
-    highlightSelected();
-    calc();
-  }
-
-  // Обработчики для чекбоксов
-  if (portraitCheckbox) {
-    portraitCheckbox.addEventListener('change', function(e) {
-      currentMode = e.target.checked ? 'pmg' : 'pmk';
-      
-      // Устанавливаем значение по умолчанию для второго колеса в зависимости от режима
-      setTimeout(() => {
-        const wheel2 = document.getElementById('w2');
-        const targetValue = currentMode === 'pmg' ? 97.0 : 65.0;
-        
-        for (let item of wheel2.children) {
-          if (item.dataset.val == targetValue) {
-            item.scrollIntoView({ block: 'center' });
-            break;
+          valueChanged = Math.abs(newValue - lastWheel2Value) > 0.01;
+          if (valueChanged) {
+            lastWheel2Value = newValue;
+            changedWheel = 2;
           }
         }
         
-        // Также обновляем ландшафтное колесо, если оно существует
-        const wheel2Landscape = document.getElementById('w2-landscape');
-        if (wheel2Landscape) {
-          for (let item of wheel2Landscape.children) {
-            if (item.dataset.val == targetValue) {
-              item.scrollIntoView({ block: 'center' });
-              break;
-            }
-          }
+        // Если значение изменилось, запускаем расчет
+        if (valueChanged) {
+          calc(true, changedWheel); // true означает, что это изменение колеса, передаем номер измененного колеса
         }
-        
-        updateModeUI();
-      }, 50);
-    });
-  }
-  
-  if (landscapeCheckbox) {
-    landscapeCheckbox.addEventListener('change', function(e) {
-      currentMode = e.target.checked ? 'pmg' : 'pmk';
-      
-      // Устанавливаем значение по умолчанию для второго колеса в зависимости от режима
-      setTimeout(() => {
-        const wheel2 = document.getElementById('w2');
-        const targetValue = currentMode === 'pmg' ? 97.0 : 65.0;
-        
-        for (let item of wheel2.children) {
-          if (item.dataset.val == targetValue) {
-            item.scrollIntoView({ block: 'center' });
-            break;
-          }
-        }
-        
-        // Также обновляем ландшафтное колесо
-        const wheel2Landscape = document.getElementById('w2-landscape');
-        if (wheel2Landscape) {
-          for (let item of wheel2Landscape.children) {
-            if (item.dataset.val == targetValue) {
-              item.scrollIntoView({ block: 'center' });
-              break;
-            }
-          }
-        }
-        
-        updateModeUI();
-      }, 50);
-    });
+      }, 120);
+    };
   }
 
-  function highlightSelected() {
-    const wheels = document.querySelectorAll('.wheel');
-    wheels.forEach(w => {
-      Array.from(w.children).forEach(child => {
-        if (child.classList.contains('selected')) {
-          child.classList.remove('selected');
-          child.classList.add('selected');
-        }
-      });
-    });
-  }
-
-  // --- Колёса, расчеты, ландшафт ---
-  function fillWheel(el, start, end){
-    for(let i=start; i<=end; i+=0.5){
-      let d=document.createElement('div');
-      d.className='value';
-      d.innerText=i.toFixed(1);
-      d.dataset.val=i;
-      el.appendChild(d);
-    }
-  }
-  
-  // Первое колесо (ПМК) от 30 до 90
-  fillWheel(document.getElementById('w1'), 30, 90);
-  // Второе колесо от 50 до 120 для ПМГ
-  fillWheel(document.getElementById('w2'), 50, 120);
-
-  function setDefaultValues() {
-    // Первое колесо всегда 55.0
-    const items1 = document.getElementById('w1').children;
-    for (let item of items1) { 
-      if (item.dataset.val == 55.0) { 
-        item.scrollIntoView({ block: 'center' }); 
-        break; 
-      } 
-    }
-    
-    // Второе колесо - в зависимости от режима
-    const items2 = document.getElementById('w2').children;
-    const targetValue = currentMode === 'pmg' ? 97.0 : 65.0;
-    
-    for (let item of items2) { 
-      if (item.dataset.val == targetValue) { 
-        item.scrollIntoView({ block: 'center' }); 
-        break; 
-      } 
-    }
-  }
-
-  function getCenterValue(wheel){
-    const rect = wheel.getBoundingClientRect();
-    const wheelCenter = rect.top + rect.height / 2;
-    let items = [...wheel.children];
-    let selectedItem = null;
-    let minDistance = Infinity;
-    items.forEach(it => it.classList.remove('selected'));
-    items.forEach(it => {
-      const itemRect = it.getBoundingClientRect();
-      const itemCenter = itemRect.top + itemRect.height / 2;
-      const distance = Math.abs(itemCenter - wheelCenter);
-      if (distance < minDistance) { minDistance = distance; selectedItem = it; }
-    });
-    if(selectedItem) { 
-      selectedItem.classList.add('selected'); 
-      return parseFloat(selectedItem.dataset.val); 
-    }
-    // Значения по умолчанию
-    if (wheel.id === 'w1' || wheel.id === 'w1-landscape') return 55.0;
-    if (wheel.id === 'w2' || wheel.id === 'w2-landscape') {
-      return currentMode === 'pmg' ? 97.0 : 65.0;
-    }
-    return 0;
-  }
-
-  function snapToCenter(wheel){
-    const rect = wheel.getBoundingClientRect();
-    const wheelCenter = rect.top + rect.height / 2;
-    const items = [...wheel.children];
-    let closest = null, minDistance = Infinity;
-    items.forEach(item => {
-      const r = item.getBoundingClientRect();
-      const center = r.top + r.height / 2;
-      const distance = Math.abs(center - wheelCenter);
-      if(distance < minDistance){ minDistance = distance; closest = item; }
-    });
-    if(closest) closest.scrollIntoView({ block:"center", behavior:"smooth" });
-  }
-
-  function calc() {
+  // === ИСПРАВЛЕННАЯ ФУНКЦИЯ calc ===
+  function calc(fromWheelChange = false, changedWheel = null) {
     const isPmg = currentMode === 'pmg';
     let size = '-', l = '-', v = '-', cheek = '-';
     let sizeDisplay = '-';
@@ -1431,7 +1688,6 @@
     document.getElementById('sum').innerText = sumDisplay;
     const sizeElement = document.getElementById('size');
     sizeElement.innerText = sizeDisplay;
-    // Добавляем класс для стилизации, даже если значение изменилось
     sizeElement.classList.add('size-badge');
     
     document.getElementById('lob').innerText = l;
@@ -1453,30 +1709,506 @@
     if (landscapeVis) landscapeVis.innerText = v;
     if (landscapeSh) landscapeSh.innerText = cheek;
 
-    // Запускаем таймер озвучки после обновления результатов
-    speakResult();
+    // Запускаем озвучку только если это не начальная загрузка и не смена ориентации
+    if (!isInitialLoad && !isOrientationChanging) {
+      speakResult(fromWheelChange, changedWheel);
+    }
   }
 
+  // === ОБРАБОТЧИКИ СКРОЛЛА ===
   let scrollTimer;
-  [document.getElementById('w1'), document.getElementById('w2')].forEach(w => {
-    w.addEventListener('scroll', () => {
-      clearTimeout(scrollTimer);
-      scrollTimer = setTimeout(() => { 
-        snapToCenter(w); 
-        calc(); 
-      }, 120);
+  const wheel1 = document.getElementById('w1');
+  const wheel2 = document.getElementById('w2');
+  
+  wheel1.addEventListener('scroll', handleWheelScroll(wheel1));
+  wheel2.addEventListener('scroll', handleWheelScroll(wheel2));
+
+  // Функция для записи в лог
+  function writeToLog() {
+    // Получаем полную строку для файла
+    const fullLogString = getFullLogString();
+    
+    // Добавляем в буфер
+    logBuffer.push(fullLogString);
+    
+    // Сохраняем в localStorage
+    try {
+      localStorage.setItem('measurements_log', JSON.stringify(logBuffer));
+    } catch (e) {
+      console.log('Ошибка сохранения в localStorage', e);
+    }
+    
+    // Обновляем отображение
+    updateLogDisplay();
+    
+    console.log('Лог записан:', fullLogString);
+  }
+  
+  // Функция для скачивания лога в файл
+  function downloadLogToFile() {
+    if (logBuffer.length === 0) {
+      alert('Лог пуст. Сделайте несколько измерений.');
+      return;
+    }
+    
+    // Формируем содержимое с полными записями
+    const content = logBuffer.join('\n');
+    
+    // Создаем имя файла с датой
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+    const fileName = `measurements_log_${dateStr}.txt`;
+    
+    // Создаем и скачиваем файл
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    
+    if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+      window.navigator.msSaveOrOpenBlob(blob, fileName);
+    } else {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      a.style.display = 'none';
+      
+      document.body.appendChild(a);
+      a.click();
+      
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 100);
+    }
+    
+    alert(`✅ Лог сохранен как ${fileName}\n📁 Всего записей: ${logBuffer.length}`);
+  }
+  
+  // Функция для открытия лога в новой вкладке с правильной кодировкой UTF-8
+  function openLogInNewTab() {
+    if (logBuffer.length === 0) {
+      alert('Лог пуст. Сначала сделайте несколько измерений.');
+      return;
+    }
+    
+    // Формируем содержимое с полными записями
+    const content = logBuffer.join('\n');
+    
+    // Создаем HTML страницу с явным указанием кодировки UTF-8
+    const htmlContent = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Журнал измерений</title>
+<style>
+body { font-family: 'Courier New', monospace; white-space: pre; padding: 20px; }
+</style>
+</head>
+<body>
+${content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}
+</body>
+</html>`;
+    
+    // Создаем blob с типом text/html и кодировкой UTF-8
+    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+    
+    // Освобождаем URL через некоторое время
+    setTimeout(() => {
+      URL.revokeObjectURL(url);
+    }, 1000);
+  }
+  
+  // Функция для очистки лога
+  function clearLog() {
+    if (confirm('Очистить весь лог?')) {
+      logBuffer = [];
+      localStorage.removeItem('measurements_log');
+      updateLogDisplay();
+    }
+  }
+
+  // Функция для остановки текущего воспроизведения речи
+  function stopCurrentSpeech() {
+    if (speechTimeout) {
+      clearTimeout(speechTimeout);
+      speechTimeout = null;
+    }
+    
+    if (repeatInterval) {
+      clearInterval(repeatInterval);
+      repeatInterval = null;
+    }
+    
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    
+    currentRepeatCount = 0;
+    
+    // Снимаем блокировку колёс после окончания озвучки
+    setSpeechLock(false);
+  }
+
+  function startSpeechWithRepeat() {
+    if (!isSpeechEnabled()) return;
+    
+    // Блокируем все колёса на время озвучки
+    setSpeechLock(true);
+    
+    const speechParts = getCurrentSpeechText();
+    totalRepeats = getRepeatCount();
+    currentRepeatCount = 0;
+    
+    // Сбрасываем флаги изменений после начала озвучки
+    wheel1Changed = false;
+    wheel2Changed = false;
+    
+    function speakPart(index, onComplete) {
+      if (!isSpeechEnabled() || index >= speechParts.length) {
+        if (onComplete) onComplete();
+        return;
+      }
+      
+      const utterance = new SpeechSynthesisUtterance(speechParts[index]);
+      utterance.lang = 'ru-RU';
+      utterance.rate = 0.9;
+      utterance.pitch = 1;
+      
+      utterance.onend = function() {
+        if (index < speechParts.length - 1) {
+          setTimeout(() => {
+            speakPart(index + 1, onComplete);
+          }, 1000);
+        } else {
+          if (onComplete) onComplete();
+        }
+      };
+      
+      window.speechSynthesis.speak(utterance);
+    }
+    
+    function speakFullPhrase() {
+      if (!isSpeechEnabled()) {
+        stopCurrentSpeech();
+        return;
+      }
+      
+      speakPart(0, function() {
+        currentRepeatCount++;
+        
+        if (currentRepeatCount >= totalRepeats) {
+          // Записываем в лог
+          writeToLog();
+          
+          // Очищаем голосовое поле после записи в лог
+          clearVoiceInput();
+          
+          // Снимаем блокировку после завершения всех повторений
+          setSpeechLock(false);
+        } else if (currentRepeatCount < totalRepeats && isSpeechEnabled()) {
+          setTimeout(() => {
+            if (isSpeechEnabled()) {
+              speakFullPhrase();
+            }
+          }, 1000);
+        }
+      });
+    }
+    
+    speakFullPhrase();
+  }
+
+  // Обработчики изменения полей ввода
+  if (speechDelayInput) {
+    speechDelayInput.addEventListener('input', function() {
+      if (speechDelayLandscape) {
+        speechDelayLandscape.value = this.value;
+      }
+      // Не вызываем speakResult() при изменении задержки
     });
-  });
+  }
+  
+  if (speechDelayLandscape) {
+    speechDelayLandscape.addEventListener('input', function() {
+      if (speechDelayInput) {
+        speechDelayInput.value = this.value;
+      }
+    });
+  }
+
+  // Обработчики для полей повторений
+  if (speechRepeatInput) {
+    speechRepeatInput.addEventListener('input', function() {
+      if (speechRepeatLandscape) {
+        speechRepeatLandscape.value = this.value;
+      }
+    });
+  }
+  
+  if (speechRepeatLandscape) {
+    speechRepeatLandscape.addEventListener('input', function() {
+      if (speechRepeatInput) {
+        speechRepeatInput.value = this.value;
+      }
+    });
+  }
+
+  // Обработчики для переключателей озвучки
+  if (speechToggle) {
+    speechToggle.addEventListener('change', function() {
+      if (speechToggleLandscape) {
+        speechToggleLandscape.checked = this.checked;
+      }
+      updateSpeechToggleStatus();
+      
+      // Не вызываем speakResult() при включении/выключении озвучки
+    });
+  }
+  
+  if (speechToggleLandscape) {
+    speechToggleLandscape.addEventListener('change', function() {
+      if (speechToggle) {
+        speechToggle.checked = this.checked;
+      }
+      updateSpeechToggleStatus();
+    });
+  }
+
+  // Обработчики для голосового ввода
+  if (voiceRecordBtn) {
+    voiceRecordBtn.addEventListener('click', function() {
+      startVoiceRecognition(voiceRecordBtn, voiceDisplay);
+    });
+  }
+  
+  if (voiceRecordBtnLandscape) {
+    voiceRecordBtnLandscape.addEventListener('click', function() {
+      startVoiceRecognition(voiceRecordBtnLandscape, voiceDisplayLandscape);
+    });
+  }
+
+  // Обработчики для кнопок
+  if (downloadBtn) {
+    downloadBtn.addEventListener('click', downloadLogToFile);
+  }
+  
+  if (openBtn) {
+    openBtn.addEventListener('click', openLogInNewTab);
+  }
+  
+  if (clearBtn) {
+    clearBtn.addEventListener('click', clearLog);
+  }
+
+  // === ИСПРАВЛЕННАЯ updateModeUI ===
+  function updateModeUI() {
+    const isPmg = currentMode === 'pmg';
+    const modeText = isPmg ? 'ПРОТИВОГАЗА ПМГ' : 'ПРОТИВОГАЗА ПМК';
+    const modeClass = isPmg ? 'pmg-mode' : '';
+    
+    subtitleSpan.innerText = modeText;
+    subtitleSpan.className = modeClass;
+    
+    if (sumLabel) {
+      const labelText = sumLabel.childNodes[0];
+      if (labelText) {
+        labelText.textContent = isPmg ? 'Полученный размер: ' : 'Сумма 2-х измерений: ';
+      }
+    }
+    
+    if (subtitleSpanLandscape) {
+      subtitleSpanLandscape.innerText = modeText;
+      subtitleSpanLandscape.className = modeClass;
+    }
+    
+    const landscapeSumLabel = document.getElementById('landscape-sum-label');
+    if (landscapeSumLabel) {
+      landscapeSumLabel.textContent = isPmg ? 'Полученный размер:' : 'Сумма 2-х измерений:';
+    }
+    
+    document.body.classList.toggle('pmg-mode', isPmg);
+    
+    if (portraitCheckbox) portraitCheckbox.checked = isPmg;
+    if (landscapeCheckbox) landscapeCheckbox.checked = isPmg;
+    
+    const pmkColor = isPmg ? '#777' : '#2e7d32';
+    const pmgColor = isPmg ? '#b71c1c' : '#777';
+    
+    if (pmkLabel) pmkLabel.style.color = pmkColor;
+    if (pmgLabel) pmgLabel.style.color = pmgColor;
+    if (pmkLabelLandscape) pmkLabelLandscape.style.color = pmkColor;
+    if (pmgLabelLandscape) pmgLabelLandscape.style.color = pmgColor;
+    
+    // Применяем блокировку по режиму
+    applyModeLock();
+    
+    highlightSelected();
+    
+    // Сбрасываем флаги изменений колес при смене режима
+    wheel1Changed = false;
+    wheel2Changed = false;
+    
+    // Обновляем сохраненные значения после смены режима
+    updateSavedValues();
+    
+    // Пересчитываем без озвучки
+    calc(false);
+  }
+
+  // Обработчики для чекбоксов
+  if (portraitCheckbox) {
+    portraitCheckbox.addEventListener('change', function(e) {
+      currentMode = e.target.checked ? 'pmg' : 'pmk';
+      
+      setTimeout(() => {
+        const wheel2 = document.getElementById('w2');
+        const targetValue = currentMode === 'pmg' ? 97.0 : 65.0;
+        
+        for (let item of wheel2.children) {
+          if (item.dataset.val == targetValue) {
+            item.scrollIntoView({ block: 'center' });
+            break;
+          }
+        }
+        
+        const wheel2Landscape = document.getElementById('w2-landscape');
+        if (wheel2Landscape) {
+          for (let item of wheel2Landscape.children) {
+            if (item.dataset.val == targetValue) {
+              item.scrollIntoView({ block: 'center' });
+              break;
+            }
+          }
+        }
+        
+        updateModeUI();
+      }, 50);
+    });
+  }
+  
+  if (landscapeCheckbox) {
+    landscapeCheckbox.addEventListener('change', function(e) {
+      currentMode = e.target.checked ? 'pmg' : 'pmk';
+      
+      setTimeout(() => {
+        const wheel2 = document.getElementById('w2');
+        const targetValue = currentMode === 'pmg' ? 97.0 : 65.0;
+        
+        for (let item of wheel2.children) {
+          if (item.dataset.val == targetValue) {
+            item.scrollIntoView({ block: 'center' });
+            break;
+          }
+        }
+        
+        const wheel2Landscape = document.getElementById('w2-landscape');
+        if (wheel2Landscape) {
+          for (let item of wheel2Landscape.children) {
+            if (item.dataset.val == targetValue) {
+              item.scrollIntoView({ block: 'center' });
+              break;
+            }
+          }
+        }
+        
+        updateModeUI();
+      }, 50);
+    });
+  }
+
+  function highlightSelected() {
+    const wheels = document.querySelectorAll('.wheel');
+    wheels.forEach(w => {
+      Array.from(w.children).forEach(child => {
+        if (child.classList.contains('selected')) {
+          child.classList.remove('selected');
+          child.classList.add('selected');
+        }
+      });
+    });
+  }
+
+  // --- Колёса, расчеты, ландшафт ---
+  function fillWheel(el, start, end){
+    for(let i=start; i<=end; i+=0.5){
+      let d=document.createElement('div');
+      d.className='value';
+      d.innerText=i.toFixed(1);
+      d.dataset.val=i;
+      el.appendChild(d);
+    }
+  }
+  
+  fillWheel(document.getElementById('w1'), 30, 90);
+  fillWheel(document.getElementById('w2'), 50, 120);
+
+  function setDefaultValues() {
+    const items1 = document.getElementById('w1').children;
+    for (let item of items1) { 
+      if (item.dataset.val == 55.0) { 
+        item.scrollIntoView({ block: 'center' }); 
+        break; 
+      } 
+    }
+    
+    const items2 = document.getElementById('w2').children;
+    const targetValue = currentMode === 'pmg' ? 97.0 : 65.0;
+    
+    for (let item of items2) { 
+      if (item.dataset.val == targetValue) { 
+        item.scrollIntoView({ block: 'center' }); 
+        break; 
+      } 
+    }
+  }
+
+  function getCenterValue(wheel){
+    const rect = wheel.getBoundingClientRect();
+    const wheelCenter = rect.top + rect.height / 2;
+    let items = [...wheel.children];
+    let selectedItem = null;
+    let minDistance = Infinity;
+    items.forEach(it => it.classList.remove('selected'));
+    items.forEach(it => {
+      const itemRect = it.getBoundingClientRect();
+      const itemCenter = itemRect.top + itemRect.height / 2;
+      const distance = Math.abs(itemCenter - wheelCenter);
+      if (distance < minDistance) { minDistance = distance; selectedItem = it; }
+    });
+    if(selectedItem) { 
+      selectedItem.classList.add('selected'); 
+      return parseFloat(selectedItem.dataset.val); 
+    }
+    if (wheel.id === 'w1' || wheel.id === 'w1-landscape') return 55.0;
+    if (wheel.id === 'w2' || wheel.id === 'w2-landscape') {
+      return currentMode === 'pmg' ? 97.0 : 65.0;
+    }
+    return 0;
+  }
+
+  function snapToCenter(wheel){
+    const rect = wheel.getBoundingClientRect();
+    const wheelCenter = rect.top + rect.height / 2;
+    const items = [...wheel.children];
+    let closest = null, minDistance = Infinity;
+    items.forEach(item => {
+      const r = item.getBoundingClientRect();
+      const center = r.top + r.height / 2;
+      const distance = Math.abs(center - wheelCenter);
+      if(distance < minDistance){ minDistance = distance; closest = item; }
+    });
+    if(closest) closest.scrollIntoView({ block:"center", behavior:"smooth" });
+  }
 
   function createLandscapeView() {
-    if (!landscapeContainer) return;
+    if (!landscapeContent) return;
     
     const originalImages = document.querySelectorAll('.image-card img');
     const originalCaptions = document.querySelectorAll('.image-caption');
     if (originalImages.length < 2) return;
     
-    landscapeContainer.innerHTML = '';
-    landscapeContainer.className = 'landscape-row';
+    landscapeContent.innerHTML = '';
 
     function createImageItem(imgSrc, captionText, index) {
       const item = document.createElement('div'); 
@@ -1484,7 +2216,6 @@
       const img = document.createElement('img'); 
       img.src = imgSrc; 
       img.alt = `Измерение ${index+1}`;
-      // Добавляем обработчик ошибок и для ландшафтных изображений
       img.onerror = function() { 
         this.src = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'95\' height=\'71\' viewBox=\'0 0 95 71\'%3E%3Crect width=\'95\' height=\'71\' fill=\'%23' + (index === 0 ? '2e7d32' : '0000ff') + '\'/%3E%3Ctext x=\'47.5\' y=\'35.5\' font-family=\'Arial\' font-size=\'10\' fill=\'white\' text-anchor=\'middle\' dominant-baseline=\'middle\'%3E' + (index === 0 ? 'Размер 1' : 'Размер 2') + '%3C/text%3E%3C/svg%3E'; 
       };
@@ -1516,7 +2247,32 @@
         clearTimeout(timer);
         timer = setTimeout(() => { 
           snapToCenter(wheel); 
-          calc(); 
+          
+          // Получаем новые значения после центрирования
+          const newValue = getCenterValue(wheel);
+          
+          // Определяем какое колесо было изменено
+          let changedWheel = null;
+          let valueChanged = false;
+          
+          if (wheel.id === 'w1-landscape') {
+            valueChanged = Math.abs(newValue - lastWheel1Value) > 0.01;
+            if (valueChanged) {
+              lastWheel1Value = newValue;
+              changedWheel = 1;
+            }
+          } else if (wheel.id === 'w2-landscape') {
+            valueChanged = Math.abs(newValue - lastWheel2Value) > 0.01;
+            if (valueChanged) {
+              lastWheel2Value = newValue;
+              changedWheel = 2;
+            }
+          }
+          
+          // Если значение изменилось, запускаем расчет
+          if (valueChanged && !isInitialLoad && !isOrientationChanging) {
+            calc(true, changedWheel);
+          }
         }, 120);
       });
       return item;
@@ -1539,14 +2295,39 @@
       return item;
     }
 
-    landscapeContainer.appendChild(createImageItem(originalImages[0].src, originalCaptions[0].textContent, 0));
-    landscapeContainer.appendChild(createWheelItem('w1', 'w1-landscape'));
-    landscapeContainer.appendChild(createImageItem(originalImages[1].src, originalCaptions[1].textContent, 1));
-    landscapeContainer.appendChild(createWheelItem('w2', 'w2-landscape'));
-    landscapeContainer.appendChild(createResultItem());
+    // Создаем первый ряд с картинками и колесами
+    const row1 = document.createElement('div');
+    row1.className = 'landscape-row';
+    row1.appendChild(createImageItem(originalImages[0].src, originalCaptions[0].textContent, 0));
+    row1.appendChild(createWheelItem('w1', 'w1-landscape'));
+    row1.appendChild(createImageItem(originalImages[1].src, originalCaptions[1].textContent, 1));
+    row1.appendChild(createWheelItem('w2', 'w2-landscape'));
+    row1.appendChild(createResultItem());
+    
+    landscapeContent.appendChild(row1);
+    
+    // Создаем футер с логом и кнопками
+    const footer = document.createElement('div');
+    footer.className = 'landscape-footer';
+    footer.id = 'landscape-footer';
+    footer.innerHTML = `
+      <div class="log-panel" id="landscapeLogPanel">
+        <div class="log-title">
+          ЖУРНАЛ ИЗМЕРЕНИЙ
+          <span id="landscapeLogCount">всего: ${logBuffer.length}</span>
+        </div>
+        <div id="landscapeLogEntries"></div>
+      </div>
+      <div class="action-buttons">
+        <button class="action-btn" id="landscapeDownloadBtn">💾 Сохранить лог</button>
+        <button class="action-btn open" id="landscapeOpenBtn">📂 Открыть лог</button>
+        <button class="action-btn clear" id="landscapeClearBtn">🗑️ Очистить</button>
+      </div>
+    `;
+    
+    landscapeContent.appendChild(footer);
 
     setTimeout(() => {
-      // Устанавливаем значения по умолчанию для ландшафтных колес
       const wheel1 = document.getElementById('w1-landscape');
       const wheel2 = document.getElementById('w2-landscape');
       
@@ -1569,7 +2350,7 @@
         }
       }
       
-      // Применяем состояние disabled для первого колеса в ландшафтном режиме
+      // Применяем блокировку по режиму для ландшафтных колёс
       const wheels = document.querySelectorAll('.landscape-item .wheel');
       if (wheels.length >= 2) {
         if (currentMode === 'pmg') {
@@ -1577,17 +2358,60 @@
         } else {
           wheels[0].classList.remove('disabled');
         }
+        // Второе колесо всегда без disabled (но speech-lock может быть)
       }
       
-      setTimeout(calc, 100);
+      // Назначаем обработчики для кнопок в альбомном режиме
+      document.getElementById('landscapeDownloadBtn').addEventListener('click', downloadLogToFile);
+      document.getElementById('landscapeOpenBtn').addEventListener('click', openLogInNewTab);
+      document.getElementById('landscapeClearBtn').addEventListener('click', clearLog);
+      
+      // Копируем записи в альбомный лог
+      const landscapeLogEntries = document.getElementById('landscapeLogEntries');
+      if (landscapeLogEntries) {
+        if (logBuffer.length === 0) {
+          const emptyDiv = document.createElement('div');
+          emptyDiv.className = 'log-empty';
+          emptyDiv.innerText = 'Нет записей';
+          landscapeLogEntries.appendChild(emptyDiv);
+        } else {
+          const lastEntries = logBuffer.slice(-4).reverse();
+          
+          for (let i = 0; i < lastEntries.length; i++) {
+            const entryDiv = document.createElement('div');
+            entryDiv.className = 'log-entry';
+            
+            if (lastEntries[i].includes('ПМК')) {
+              entryDiv.classList.add('pmk');
+            } else {
+              entryDiv.classList.add('pmg');
+            }
+            
+            const shortStr = getShortDisplayString(lastEntries[i]);
+            entryDiv.innerText = shortStr;
+            landscapeLogEntries.appendChild(entryDiv);
+          }
+        }
+      }
+      
+      // Обновляем сохраненные значения после создания ландшафтного вида
+      updateSavedValues();
+      
+      setTimeout(() => calc(false), 100);
     }, 100);
   }
 
+  // === ИСПРАВЛЕННАЯ ФУНКЦИЯ ОБРАБОТКИ ИЗМЕНЕНИЯ ОРИЕНТАЦИИ ===
   function handleOrientationChange() {
+    // Устанавливаем флаг изменения ориентации
+    isOrientationChanging = true;
+    
     const imagesRow = document.querySelector('.images-row');
     const wheelsRow = document.querySelector('.wheels-row');
     const portraitResult = document.getElementById('portrait-result');
     const portraitHeader = document.getElementById('portraitHeader');
+    const logPanel = document.getElementById('logPanel');
+    const actionButtons = document.querySelector('.action-buttons');
     
     if (window.matchMedia("(orientation: landscape)").matches) {
       // Альбомная - показываем альбомные элементы, скрываем книжные
@@ -1595,50 +2419,52 @@
       if (wheelsRow) wheelsRow.style.display = 'none';
       if (portraitResult) portraitResult.style.display = 'none';
       if (portraitHeader) portraitHeader.style.display = 'none';
+      if (logPanel) logPanel.style.display = 'none';
+      if (actionButtons) actionButtons.style.display = 'none';
       
       // Показываем альбомные элементы
       if (landscapeHeader) landscapeHeader.style.display = 'flex';
-      if (landscapeContainer) {
-        if (!landscapeContainer.children.length) createLandscapeView();
-        landscapeContainer.style.display = 'flex';
-        
-        // Обновляем состояние disabled для первого колеса
-        const wheels = document.querySelectorAll('.landscape-item .wheel');
-        if (wheels.length >= 2) {
-          if (currentMode === 'pmg') {
-            wheels[0].classList.add('disabled');
-          } else {
-            wheels[0].classList.remove('disabled');
-          }
-        }
-        
-        // Обновляем текст для альбомного режима
-        const landscapeSumLabel = document.getElementById('landscape-sum-label');
-        if (landscapeSumLabel) {
-          landscapeSumLabel.textContent = currentMode === 'pmg' ? 'Полученный размер:' : 'Сумма 2-х измерений:';
-        }
+      if (landscapeContent) {
+        if (!landscapeContent.children.length) createLandscapeView();
+        landscapeContent.style.display = 'block';
       }
       
-      // Синхронизируем значения
       syncDelayInputs();
       syncSpeechToggles();
       syncRepeatInputs();
+      syncVoiceDisplay(); // синхронизируем голосовое поле
+      
+      // Обновляем сохраненные значения для альбомного режима
+      updateSavedValues();
     } else {
       // Книжная - показываем книжные элементы, скрываем альбомные
       if (imagesRow) imagesRow.style.display = 'flex';
       if (wheelsRow) wheelsRow.style.display = 'flex';
       if (portraitResult) portraitResult.style.display = 'block';
       if (portraitHeader) portraitHeader.style.display = 'flex';
+      if (logPanel) logPanel.style.display = 'block';
+      if (actionButtons) actionButtons.style.display = 'flex';
       
       if (landscapeHeader) landscapeHeader.style.display = 'none';
-      if (landscapeContainer) landscapeContainer.style.display = 'none';
+      if (landscapeContent) landscapeContent.style.display = 'none';
       
-      // Синхронизируем значения
       syncDelayInputs();
       syncSpeechToggles();
       syncRepeatInputs();
+      syncVoiceDisplay(); // синхронизируем голосовое поле
+      
+      // Обновляем сохраненные значения для книжного режима
+      updateSavedValues();
     }
-    setTimeout(calc, 100);
+    
+    // Пересчитываем без озвучки
+    setTimeout(() => {
+      calc(false);
+      // Снимаем флаг изменения ориентации после завершения перерисовки
+      setTimeout(() => {
+        isOrientationChanging = false;
+      }, 300);
+    }, 100);
   }
 
   window.addEventListener('resize', handleOrientationChange);
@@ -1647,7 +2473,27 @@
   // Устанавливаем начальные значения
   setTimeout(() => {
     setDefaultValues();
-    setTimeout(calc, 50);
+    
+    // Инициализируем последние значения
+    const { wheel1, wheel2 } = getCurrentWheelValues();
+    lastWheel1Value = wheel1;
+    lastWheel2Value = wheel2;
+    lastMode = currentMode;
+    
+    // Сбрасываем флаги изменений колес
+    wheel1Changed = false;
+    wheel2Changed = false;
+    
+    // Снимаем флаг начальной загрузки через некоторое время
+    setTimeout(() => {
+      isInitialLoad = false;
+    }, 500);
+    
+    setTimeout(() => calc(false), 50); // false - не озвучивать при загрузке
+    
+    // Обновляем отображение лога
+    updateLogDisplay();
+    syncVoiceDisplay();
   }, 100);
   
   setTimeout(handleOrientationChange, 200);
@@ -1656,11 +2502,6 @@
   updateModeUI();
   updateSpeechToggleStatus();
 })();
-</script>
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js');
-}
 </script>
 </body>
 </html>
